@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>AURA · What does your soul look like?</title>
+<meta name="description" content="Type your name and watch your one-of-a-kind aura come to life. Discover your aura name, your energy blend, and a reading made just for you." />
+<meta name="theme-color" content="#0a0a14" />
+
+<!-- Social / Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="AURA · What does your soul look like?" />
+<meta property="og:description" content="Type your name and watch your one-of-a-kind aura come to life. Discover your aura name, energy blend and a reading made just for you." />
+<meta property="og:image" content="og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AURA · What does your soul look like?" />
+<meta name="twitter:description" content="Reveal your one-of-a-kind aura. Made for you." />
+<meta name="twitter:image" content="og.png" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23ff5ec7'/%3E%3Cstop offset='0.5' stop-color='%237b5cff'/%3E%3Cstop offset='1' stop-color='%2300e0ff'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='42' fill='url(%23g)'/%3E%3C/svg%3E" />
+
+<style>
+  :root{
+    --bg:#06060d;
+    --ink:#f4f3ff;
+    --muted:#9b97c9;
+    --card:rgba(255,255,255,.045);
+    --line:rgba(255,255,255,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    overflow:hidden;
+    position:fixed;inset:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  canvas#stage{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 42%, transparent 40%, rgba(0,0,0,.55) 100%)}
+
+  .wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:24px;
+    overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  /* ---------- INTRO ---------- */
+  #intro{max-width:540px;transition:opacity .6s ease, transform .6s ease}
+  .kicker{letter-spacing:.42em;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+  h1{font-size:clamp(46px,15vw,104px);margin:0;font-weight:800;letter-spacing:-.04em;line-height:.9;
+    background:linear-gradient(120deg,#ff5ec7,#7b5cff 45%,#00e0ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--muted);font-size:clamp(15px,4.2vw,19px);margin:18px auto 30px;max-width:380px;line-height:1.5}
+  .field{display:flex;gap:10px;max-width:420px;margin:0 auto;width:100%}
+  input{
+    flex:1;min-width:0;padding:16px 20px;border-radius:16px;border:1px solid var(--line);
+    background:var(--card);color:var(--ink);font-size:17px;outline:none;transition:border .2s,background .2s}
+  input:focus{border-color:rgba(123,92,255,.8);background:rgba(255,255,255,.07)}
+  input::placeholder{color:#6f6b97}
+  button{font-family:inherit;cursor:pointer;border:none}
+  .go{
+    padding:16px 22px;border-radius:16px;font-weight:700;font-size:16px;color:#0a0a14;white-space:nowrap;
+    background:linear-gradient(120deg,#ff5ec7,#7b5cff 50%,#00e0ff);
+    box-shadow:0 8px 30px rgba(123,92,255,.45);transition:transform .15s,filter .2s}
+  .go:active{transform:scale(.96)}
+  .go:hover{filter:brightness(1.08)}
+  .hint{margin-top:16px;color:#5d5a85;font-size:12.5px}
+
+  /* ---------- RESULT ---------- */
+  #result{max-width:560px;width:100%;opacity:0;transform:translateY(14px);pointer-events:none;
+    transition:opacity .7s ease .15s, transform .7s ease .15s}
+  #result.show{opacity:1;transform:none;pointer-events:auto}
+  .auraName{font-size:clamp(34px,9vw,58px);font-weight:800;letter-spacing:-.03em;margin:2px 0 4px;line-height:1}
+  .auraName .em{background:linear-gradient(120deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .forName{color:var(--muted);font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:22px}
+  .reading{font-size:clamp(16px,4.4vw,19px);line-height:1.6;color:#e7e5ff;margin:0 auto 24px;max-width:460px}
+
+  .bars{max-width:420px;margin:0 auto 22px;text-align:left;display:grid;gap:11px}
+  .bar{display:grid;grid-template-columns:78px 1fr 44px;align-items:center;gap:12px;font-size:13px}
+  .bar .lbl{color:var(--muted)}
+  .bar .track{height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+  .bar .fill{height:100%;width:0;border-radius:6px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+  .bar .pct{text-align:right;font-variant-numeric:tabular-nums;color:#cfccef}
+
+  .traits{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 28px;max-width:440px}
+  .chip{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);
+    font-size:13px;color:#e7e5ff}
+
+  .actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .act{padding:13px 20px;border-radius:14px;font-weight:600;font-size:14.5px;
+    border:1px solid var(--line);background:var(--card);color:var(--ink);transition:transform .15s,background .2s}
+  .act:active{transform:scale(.96)}
+  .act:hover{background:rgba(255,255,255,.09)}
+  .act.primary{color:#0a0a14;border:none;background:linear-gradient(120deg,var(--c1),var(--c2));box-shadow:0 8px 26px rgba(123,92,255,.4)}
+
+  .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);z-index:5;
+    background:rgba(20,20,34,.92);border:1px solid var(--line);color:var(--ink);
+    padding:12px 20px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .credit{position:fixed;bottom:12px;left:0;right:0;text-align:center;z-index:3;
+    font-size:11px;color:#403d63;letter-spacing:.08em}
+  .credit a{color:#5b5788;text-decoration:none}
+
+  @media (max-width:430px){
+    .field{flex-direction:column}
+    .go{width:100%}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none!important}
+  }
+</style>
+</head>
+<body>
+  <canvas id="stage"></canvas>
+  <div class="vignette"></div>
+
+  <div class="wrap">
+    <section id="intro">
+      <div class="kicker">A U R A</div>
+      <h1>your soul,<br/>visualized</h1>
+      <p class="sub">Type your name. Watch a one-of-a-kind aura bloom — woven only from you.</p>
+      <form class="field" id="form">
+        <input id="name" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
+               placeholder="your name…" maxlength="40" aria-label="Your name" />
+        <button class="go" type="submit">Reveal</button>
+      </form>
+      <div class="hint">No sign-up. No data leaves your device. Just light. ✦</div>
+    </section>
+
+    <section id="result" aria-live="polite">
+      <div class="forName" id="forName"></div>
+      <div class="auraName" id="auraName"></div>
+      <p class="reading" id="reading"></p>
+      <div class="bars" id="bars"></div>
+      <div class="traits" id="traits"></div>
+      <div class="actions">
+        <button class="act primary" id="shareBtn">Share my aura</button>
+        <button class="act" id="dlBtn">Save image</button>
+        <button class="act" id="againBtn">Try a name</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="credit">made with light · <a id="rootlink" href="./">aura</a></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- deterministic randomness ---------------- */
+  function hashStr(str){
+    let h = 2166136261 >>> 0;
+    for(let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------------- word banks ---------------- */
+  const ADJ = ["Electric","Velvet","Lunar","Solar","Cosmic","Wild","Quiet","Molten","Crystal","Ember",
+    "Tidal","Feral","Gilded","Neon","Ancient","Radiant","Static","Obsidian","Aurora","Seraph",
+    "Phantom","Saffron","Glacial","Verdant","Magnetic","Twilight","Opal","Thunder","Sovereign","Astral"];
+  const NOUN = ["Phoenix","Tide","Comet","Bloom","Wolf","Mirror","Flame","Oracle","Drift","Halo",
+    "Nova","Garden","Storm","Lantern","Serpent","Prism","Echo","Falcon","Current","Spark",
+    "Monsoon","Willow","Beacon","Voyager","Ghost","Quartz","Meteor","Lotus","Raven","Dawn"];
+
+  const ENERGIES = [
+    {k:"Fire",   c:"#ff5e7a"},
+    {k:"Water",  c:"#3ad0ff"},
+    {k:"Air",    c:"#b69bff"},
+    {k:"Earth",  c:"#5fe39a"},
+    {k:"Aether", c:"#ffd66b"},
+  ];
+
+  const TRAITS = ["fiercely loyal","quietly magnetic","a born wanderer","relentlessly curious",
+    "soft but unbreakable","wildly creative","an old soul","fearless under pressure","deeply intuitive",
+    "magnetically warm","a secret romantic","unapologetically bold","calm in the chaos","endlessly generous",
+    "a midnight thinker","effortlessly cool","fiercely independent","tender-hearted","a quiet rebel",
+    "impossibly resilient","drawn to the unknown","a keeper of secrets","luminous in a crowd","stubbornly hopeful"];
+
+  const OPEN = ["You move through rooms like weather.","There's a frequency to you most people only feel.",
+    "Your energy arrives a half-second before you do.","You were never built to blend in.",
+    "Something in you keeps catching the light.","People remember the warmth long after you leave.",
+    "You carry a storm and a sanctuary at once.","Your stillness says more than most people's noise."];
+  const MID = ["You burn slow and bright, the kind of glow that outlasts the night.",
+    "You bend without breaking, and pull tides without trying.",
+    "You turn ordinary moments into something people quietly keep.",
+    "You feel everything at full volume — and that is your gift, not your flaw.",
+    "You are equal parts question and answer, always becoming.",
+    "You give people permission to be louder, softer, freer versions of themselves.",
+    "You find doors where others only see walls.",
+    "You hold contradictions the way the sky holds both stars and storms."];
+  const CLOSE = ["This year, the world tilts toward you.","Trust the pull you've been ignoring.",
+    "Your next chapter is already glowing.","Say yes to the thing that scares you a little.",
+    "The right people are already turning your way.","Go where the light feels honest.",
+    "You're closer than you think.","Something good is circling back to you."];
+
+  /* ---------------- generation ---------------- */
+  function generate(rawName){
+    const name = (rawName||"").trim();
+    const seedKey = name.toLowerCase().replace(/\s+/g,' ') || "stranger";
+    const rnd = mulberry32(hashStr(seedKey));
+    const pick = arr => arr[Math.floor(rnd()*arr.length)];
+
+    const auraName = pick(ADJ) + " " + pick(NOUN);
+
+    // unique hues
+    const baseHue = Math.floor(rnd()*360);
+    const h1 = baseHue;
+    const h2 = (baseHue + 40 + Math.floor(rnd()*120)) % 360;
+    const h3 = (baseHue + 200 + Math.floor(rnd()*100)) % 360;
+    const c1 = `hsl(${h1} 95% 64%)`;
+    const c2 = `hsl(${h2} 92% 60%)`;
+    const c3 = `hsl(${h3} 90% 62%)`;
+
+    // energy blend (sums to 100)
+    let raw = ENERGIES.map(()=> 0.15 + rnd());
+    const sum = raw.reduce((a,b)=>a+b,0);
+    let pcts = raw.map(v=> v/sum);
+    let ints = pcts.map(v=> Math.round(v*100));
+    let diff = 100 - ints.reduce((a,b)=>a+b,0);
+    ints[0]+=diff;
+    const energy = ENERGIES.map((e,i)=>({...e, pct: ints[i]}))
+                           .sort((a,b)=> b.pct - a.pct);
+
+    const traits = [];
+    while(traits.length<3){ const t = pick(TRAITS); if(!traits.includes(t)) traits.push(t); }
+
+    const reading = pick(OPEN) + " " + pick(MID) + " " + pick(CLOSE);
+
+    // rarity flavor
+    const rarity = 1 + Math.floor(rnd()*999);
+
+    return {name, auraName, h1,h2,h3, c1,c2,c3, energy, traits, reading, rarity, seed: hashStr(seedKey)};
+  }
+
+  /* ---------------- canvas aura ---------------- */
+  const canvas = document.getElementById('stage');
+  const ctx = canvas.getContext('2d');
+  let W=0,H=0,DPR=1;
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio||1, 2);
+    W = canvas.width = Math.floor(innerWidth*DPR);
+    H = canvas.height = Math.floor(innerHeight*DPR);
+    canvas.style.width = innerWidth+'px';
+    canvas.style.height = innerHeight+'px';
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  let current = null;          // current aura data
+  let blobs = [];
+  let t0 = performance.now();
+
+  function buildBlobs(data){
+    const rnd = mulberry32(data.seed ^ 0x9e3779b9);
+    const hues = [data.h1, data.h2, data.h3, data.h1, data.h2];
+    blobs = [];
+    const n = 5;
+    for(let i=0;i<n;i++){
+      blobs.push({
+        hue: hues[i%hues.length],
+        a: rnd()*Math.PI*2,
+        sp: 0.10 + rnd()*0.28,
+        rad: 0.16 + rnd()*0.18,     // fraction of min dimension
+        dist: 0.06 + rnd()*0.16,
+        phase: rnd()*Math.PI*2,
+        wob: 0.4 + rnd()*0.8
+      });
+    }
+  }
+
+  function draw(now){
+    requestAnimationFrame(draw);
+    const t = (now - t0)/1000;
+    ctx.clearRect(0,0,W,H);
+
+    // background gradient
+    const bg = ctx.createLinearGradient(0,0,W,H);
+    bg.addColorStop(0,'#06060d');
+    bg.addColorStop(1,'#0a0716');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    const cx = W*0.5, cy = H*(intro.dataset.active==="0" ? 0.34 : 0.42);
+    const minD = Math.min(W,H);
+
+    ctx.globalCompositeOperation = 'lighter';
+
+    if(blobs.length){
+      for(const b of blobs){
+        const ang = b.a + t*b.sp;
+        const wob = Math.sin(t*b.wob + b.phase)*0.04;
+        const d = (b.dist + wob)*minD;
+        const x = cx + Math.cos(ang)*d;
+        const y = cy + Math.sin(ang*1.1)*d*0.85;
+        const r = (b.rad + Math.sin(t*0.6 + b.phase)*0.02)*minD;
+        const g = ctx.createRadialGradient(x,y,0,x,y,r);
+        g.addColorStop(0, `hsla(${b.hue} 95% 62% / 0.55)`);
+        g.addColorStop(0.5,`hsla(${b.hue} 95% 58% / 0.22)`);
+        g.addColorStop(1, `hsla(${b.hue} 95% 55% / 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(x,y,r,0,Math.PI*2);
+        ctx.fill();
+      }
+      // bright core
+      const core = ctx.createRadialGradient(cx,cy,0,cx,cy,minD*0.12);
+      core.addColorStop(0,'rgba(255,255,255,0.30)');
+      core.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle = core;
+      ctx.beginPath(); ctx.arc(cx,cy,minD*0.12,0,Math.PI*2); ctx.fill();
+    } else {
+      // idle ambient orb on intro before reveal
+      const hue = (t*12)%360;
+      for(let i=0;i<3;i++){
+        const a = t*0.2 + i*2.1;
+        const x = cx + Math.cos(a)*minD*0.12;
+        const y = cy + Math.sin(a*1.2)*minD*0.10;
+        const r = minD*0.26;
+        const g = ctx.createRadialGradient(x,y,0,x,y,r);
+        g.addColorStop(0, `hsla(${(hue+i*70)%360} 90% 62% / 0.40)`);
+        g.addColorStop(1, `hsla(${(hue+i*70)%360} 90% 60% / 0)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+
+    // floating stardust
+    drawDust(t, cx, cy, minD);
+  }
+
+  // persistent dust particles
+  const dust = [];
+  function initDust(){
+    dust.length=0;
+    const n = innerWidth<600?40:70;
+    for(let i=0;i<n;i++){
+      dust.push({x:Math.random(),y:Math.random(),s:0.4+Math.random()*1.4,sp:0.01+Math.random()*0.04,ph:Math.random()*6.28});
+    }
+  }
+  initDust();
+  function drawDust(t,cx,cy,minD){
+    ctx.fillStyle='rgba(255,255,255,0.7)';
+    for(const p of dust){
+      const y = ((p.y - t*p.sp*0.05)%1+1)%1;
+      const x = p.x + Math.sin(t*0.3+p.ph)*0.01;
+      const tw = 0.4 + 0.6*Math.abs(Math.sin(t*1.5+p.ph));
+      ctx.globalAlpha = 0.10 + tw*0.30;
+      ctx.beginPath();
+      ctx.arc(x*W, y*H, p.s*DPR, 0, Math.PI*2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(draw);
+
+  /* ---------------- DOM wiring ---------------- */
+  const intro = document.getElementById('intro');
+  const result = document.getElementById('result');
+  const form = document.getElementById('form');
+  const nameInput = document.getElementById('name');
+  intro.dataset.active = "1";
+
+  function setVar(el,name,val){ el.style.setProperty(name,val); }
+
+  function render(data, push){
+    current = data;
+    buildBlobs(data);
+
+    document.getElementById('forName').textContent = data.name ? ("the aura of "+data.name) : "the aura of you";
+    const an = document.getElementById('auraName');
+    an.innerHTML = '<span class="em">'+escapeHtml(data.auraName)+'</span>';
+    setVar(result,'--c1',data.c1);
+    setVar(result,'--c2',data.c2);
+    document.body.style.setProperty('--c1',data.c1);
+    document.body.style.setProperty('--c2',data.c2);
+
+    document.getElementById('reading').textContent = data.reading;
+
+    const bars = document.getElementById('bars');
+    bars.innerHTML = '';
+    data.energy.forEach(e=>{
+      const row = document.createElement('div');
+      row.className='bar';
+      row.innerHTML = `<span class="lbl">${e.k}</span>
+        <span class="track"><span class="fill" style="background:${e.c}"></span></span>
+        <span class="pct">${e.pct}%</span>`;
+      bars.appendChild(row);
+      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{
+        row.querySelector('.fill').style.width = e.pct+'%';
+      });});
+    });
+
+    const traits = document.getElementById('traits');
+    traits.innerHTML='';
+    data.traits.forEach(tr=>{
+      const c=document.createElement('span');c.className='chip';c.textContent=tr;traits.appendChild(c);
+    });
+
+    // transition
+    intro.style.opacity='0';
+    intro.style.transform='translateY(-12px)';
+    intro.style.pointerEvents='none';
+    intro.dataset.active="0";
+    result.classList.add('show');
+
+    // url
+    const url = new URL(location.href);
+    if(data.name) url.searchParams.set('name', data.name);
+    else url.searchParams.delete('name');
+    if(push) history.pushState({name:data.name}, '', url);
+
+    document.title = data.name ? `${data.name}'s aura is ${data.auraName} · AURA` : 'AURA · your soul, visualized';
+  }
+
+  function reset(){
+    result.classList.remove('show');
+    intro.style.opacity='1';
+    intro.style.transform='none';
+    intro.style.pointerEvents='auto';
+    intro.dataset.active="1";
+    current=null; blobs=[];
+    nameInput.value='';
+    const url=new URL(location.href); url.searchParams.delete('name'); history.pushState({},'',url);
+    document.title='AURA · your soul, visualized';
+    setTimeout(()=>nameInput.focus(),300);
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    const v = nameInput.value.trim();
+    render(generate(v), true);
+  });
+
+  document.getElementById('againBtn').addEventListener('click', reset);
+
+  document.getElementById('shareBtn').addEventListener('click', async function(){
+    const url = location.href;
+    const text = current ? `My aura is ${current.auraName} ✦ what's yours?` : `Discover your aura ✦`;
+    if(navigator.share){
+      try{ await navigator.share({title:'AURA', text, url}); return; }catch(_){}
+    }
+    try{
+      await navigator.clipboard.writeText(url);
+      toast('Link copied — go make someone curious ✦');
+    }catch(_){ toast(url); }
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    if(!current){ toast('Reveal an aura first ✦'); return; }
+    makeCard(current);
+  });
+
+  /* ---------------- share card (PNG) ---------------- */
+  function makeCard(data){
+    const w=1080,h=1350;
+    const cv=document.createElement('canvas');cv.width=w;cv.height=h;
+    const c=cv.getContext('2d');
+    // bg
+    const bg=c.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#06060d');bg.addColorStop(1,'#0b0718');
+    c.fillStyle=bg;c.fillRect(0,0,w,h);
+    // aura
+    const cx=w/2, cy=h*0.40, R=420;
+    c.globalCompositeOperation='lighter';
+    const hues=[data.h1,data.h2,data.h3,data.h1,data.h2];
+    for(let i=0;i<5;i++){
+      const a=i*1.4;
+      const x=cx+Math.cos(a)*R*0.35, y=cy+Math.sin(a*1.1)*R*0.32;
+      const g=c.createRadialGradient(x,y,0,x,y,R*0.85);
+      g.addColorStop(0,`hsla(${hues[i]} 95% 62% / 0.55)`);
+      g.addColorStop(0.5,`hsla(${hues[i]} 95% 58% / 0.20)`);
+      g.addColorStop(1,`hsla(${hues[i]} 95% 55% / 0)`);
+      c.fillStyle=g;c.beginPath();c.arc(x,y,R*0.85,0,Math.PI*2);c.fill();
+    }
+    const core=c.createRadialGradient(cx,cy,0,cx,cy,R*0.4);
+    core.addColorStop(0,'rgba(255,255,255,0.35)');core.addColorStop(1,'rgba(255,255,255,0)');
+    c.fillStyle=core;c.beginPath();c.arc(cx,cy,R*0.4,0,Math.PI*2);c.fill();
+    c.globalCompositeOperation='source-over';
+
+    c.textAlign='center';
+    c.fillStyle='#9b97c9';
+    c.font='600 30px -apple-system,Segoe UI,Roboto,sans-serif';
+    c.fillText('A U R A', cx, 120);
+
+    c.fillStyle='#bdb9e6';
+    c.font='500 34px -apple-system,Segoe UI,Roboto,sans-serif';
+    c.fillText((data.name?('the aura of '+data.name):'the aura of you').toUpperCase(), cx, h*0.40+R*0.55);
+
+    // aura name gradient text
+    const grad=c.createLinearGradient(cx-380,0,cx+380,0);
+    grad.addColorStop(0,data.c1);grad.addColorStop(1,data.c2);
+    c.fillStyle=grad;
+    c.font='800 86px -apple-system,Segoe UI,Roboto,sans-serif';
+    c.fillText(data.auraName, cx, h*0.40+R*0.55+96);
+
+    // reading wrapped
+    c.fillStyle='#e7e5ff';
+    c.font='400 33px -apple-system,Segoe UI,Roboto,sans-serif';
+    wrap(c, data.reading, cx, h*0.40+R*0.55+170, 860, 46);
+
+    // energies
+    let ey=h-250;
+    c.font='600 28px -apple-system,Segoe UI,Roboto,sans-serif';
+    data.energy.slice(0,3).forEach((e,i)=>{
+      const bx=cx-380, bw=760, y=ey+i*56;
+      c.textAlign='left';c.fillStyle='#9b97c9';c.fillText(e.k, bx, y+8);
+      c.fillStyle='rgba(255,255,255,0.1)';roundRect(c,bx+150,y-12,bw-220,16,8);c.fill();
+      c.fillStyle=e.c;roundRect(c,bx+150,y-12,(bw-220)*e.pct/100,16,8);c.fill();
+      c.textAlign='right';c.fillStyle='#cfccef';c.fillText(e.pct+'%', bx+bw, y+8);
+    });
+
+    c.textAlign='center';c.fillStyle='#5b5788';
+    c.font='500 26px -apple-system,Segoe UI,Roboto,sans-serif';
+    c.fillText('discover yours · '+location.host+location.pathname.replace(/index\.html$/,''), cx, h-70);
+
+    cv.toBlob(function(blob){
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=(data.name?data.name.replace(/\s+/g,'-'):'my')+'-aura.png';
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+      toast('Saved ✦ share it anywhere');
+    },'image/png');
+  }
+  function wrap(c,text,x,y,maxW,lh){
+    const words=text.split(' ');let line='';let yy=y;
+    for(const w of words){
+      const test=line+w+' ';
+      if(c.measureText(test).width>maxW && line){c.fillText(line.trim(),x,yy);line=w+' ';yy+=lh;}
+      else line=test;
+    }
+    c.fillText(line.trim(),x,yy);
+  }
+  function roundRect(c,x,y,w,h,r){
+    c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);
+    c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();
+  }
+
+  /* ---------------- misc ---------------- */
+  let toastTimer;
+  function toast(msg){
+    const el=document.getElementById('toast');
+    el.textContent=msg;el.classList.add('show');
+    clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
+  }
+  function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  addEventListener('popstate',function(){
+    const n=new URL(location.href).searchParams.get('name');
+    if(n!==null){ nameInput.value=n; render(generate(n), false); }
+    else reset();
+  });
+
+  // deep link
+  const initName = new URL(location.href).searchParams.get('name');
+  if(initName!==null){
+    nameInput.value=initName;
+    render(generate(initName), false);
+  } else {
+    setTimeout(()=>nameInput.focus(),600);
+  }
+})();
+</script>
+</body>
+</html>
