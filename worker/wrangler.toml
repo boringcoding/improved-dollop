@@ -1,0 +1,10 @@
+name = "aura-preview"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Bundle the .ttf fonts as binary modules (imported as ArrayBuffers)
+rules = [
+  { type = "Data", globs = ["**/*.ttf"] }
+]
