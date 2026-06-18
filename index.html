@@ -47,7 +47,7 @@
     background:radial-gradient(130% 120% at 50% 40%, transparent 45%, rgba(0,0,0,.6) 100%)}
   .scrim{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .9s ease;
     background:linear-gradient(to bottom, transparent 26%, rgba(5,5,12,.72) 50%, var(--bg) 76%)}
-  body.result-mode .scrim{opacity:1}
+  body.result-mode .scrim, body.match-mode .scrim{opacity:1}
 
   .wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;
@@ -114,30 +114,38 @@
   .act.primary{color:#0a0a14;border:none;background:linear-gradient(110deg,var(--c1),var(--c2));box-shadow:0 8px 26px rgba(123,92,255,.42)}
   .act.match{border-color:rgba(255,94,199,.5);color:#ffd9f1}
 
-  /* MATCH MODAL */
-  .modal{position:fixed;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;padding:22px;
-    background:rgba(4,4,11,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-    opacity:0;pointer-events:none;transition:opacity .35s ease}
-  .modal.show{opacity:1;pointer-events:auto}
-  .sheet{width:100%;max-width:440px;border-radius:26px;padding:28px 24px;
-    background:linear-gradient(180deg, rgba(28,24,48,.96), rgba(14,12,26,.96));
-    border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.6);
-    transform:translateY(20px) scale(.97);transition:transform .4s cubic-bezier(.2,.8,.2,1);text-align:center}
-  .modal.show .sheet{transform:none}
-  .sheet h3{margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:-.02em}
-  .sheet p.s{color:var(--muted);font-size:14px;margin:0 0 20px;line-height:1.5}
-  .matchField{display:flex;gap:10px;margin-bottom:6px}
-  .closeX{position:absolute;top:16px;right:18px;font-size:24px;color:var(--muted);background:none;line-height:1}
-  /* match result */
-  .scoreWrap{margin:6px 0 14px}
-  .scoreNum{font-size:74px;font-weight:800;letter-spacing:-.04em;line-height:1;
-    background:linear-gradient(110deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .scoreNum .pc{font-size:34px;font-weight:700}
-  .matchNames{font-size:14px;color:#cfccf0;letter-spacing:.04em;margin-bottom:4px}
-  .verdict{font-size:17px;line-height:1.5;color:#ece9ff;margin:8px auto 22px;max-width:340px}
-  .heartline{height:10px;border-radius:6px;background:rgba(255,255,255,.09);overflow:hidden;margin:0 0 22px}
-  .heartline > i{display:block;height:100%;border-radius:6px;width:0;
-    background:linear-gradient(90deg,var(--c1),var(--c2));transition:width 1.1s cubic-bezier(.2,.85,.25,1);box-shadow:0 0 12px var(--c1)}
+  /* MATCH: full-screen reveal over the live aura */
+  #matchView{position:fixed;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;
+    justify-content:flex-start;text-align:center;padding:20vh 24px calc(96px + env(safe-area-inset-bottom));
+    opacity:0;transform:translateY(12px);pointer-events:none;overflow-y:auto;
+    transition:opacity .6s ease,transform .6s ease}
+  body.match-mode #matchView{opacity:1;transform:none;pointer-events:auto}
+  body.match-mode #result{display:none}
+  .mNames{font-size:14px;letter-spacing:.14em;color:#d7d4ff;text-transform:uppercase;margin-bottom:6px;font-weight:600}
+  .mScore{font-weight:800;letter-spacing:-.05em;line-height:.86;font-size:clamp(86px,27vw,164px);
+    background:linear-gradient(110deg,var(--c1),var(--c2));background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 46px rgba(123,92,255,.55));animation:sheen 6s ease-in-out infinite}
+  .mScore .pc{font-size:.4em;font-weight:700;letter-spacing:0}
+  .mHeart{width:min(330px,74vw);height:13px;border-radius:8px;background:rgba(255,255,255,.1);overflow:hidden;
+    margin:20px 0;box-shadow:inset 0 1px 3px rgba(0,0,0,.35)}
+  .mHeart > i{display:block;height:100%;width:0;border-radius:8px;
+    background:linear-gradient(90deg,var(--c1),var(--c2));box-shadow:0 0 18px var(--c1);
+    transition:width 1.3s cubic-bezier(.2,.85,.25,1)}
+  .mVerdict{font-size:clamp(17px,4.8vw,21px);line-height:1.5;color:#f3f1ff;max-width:390px;margin:0 auto 28px;font-weight:500}
+
+  /* MATCH: slim name entry bar */
+  .matchbar{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(160%);z-index:7;width:calc(100% - 32px);max-width:450px;
+    display:flex;gap:8px;align-items:center;padding:10px;border-radius:20px;
+    background:rgba(18,16,32,.86);border:1px solid var(--line);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 16px 50px rgba(0,0,0,.5);
+    transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+  .matchbar.show{transform:translateX(-50%) translateY(0)}
+  .matchbar form{display:flex;gap:8px;flex:1;min-width:0}
+  .matchbar input{flex:1;min-width:0;padding:13px 16px;border-radius:13px;font-size:16px}
+  .matchbar .go{padding:13px 16px;border-radius:13px;font-size:14px}
+  .mclose{font-size:23px;color:var(--muted);background:none;padding:0 8px;line-height:1}
 
   .toast{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);z-index:8;
     background:rgba(22,20,38,.94);border:1px solid var(--line);color:var(--ink);
@@ -148,7 +156,7 @@
   .credit{position:fixed;bottom:0;left:0;right:0;text-align:center;z-index:3;
     font-size:11px;color:#403d63;letter-spacing:.1em;padding:14px 0 calc(12px + env(safe-area-inset-bottom));
     pointer-events:none;background:linear-gradient(to top, rgba(5,5,12,.92), transparent)}
-  body.result-mode .credit{display:none}
+  body.result-mode .credit, body.match-mode .credit{display:none}
 
   @media (max-width:440px){ .field{flex-direction:column} .go{width:100%} }
   @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition-duration:.01ms!important} }
@@ -190,30 +198,27 @@
     </section>
   </div>
 
-  <!-- MATCH MODAL -->
-  <div class="modal" id="modal">
-    <div class="sheet">
-      <button class="closeX" id="closeX" aria-label="Close">×</button>
-      <div id="matchInput">
-        <h3>Aura compatibility 💞</h3>
-        <p class="s">Enter another name. We'll read how your two auras resonate.</p>
-        <form class="matchField" id="matchForm">
-          <input id="matchName" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
-                 placeholder="their name…" maxlength="40" aria-label="Their name" />
-          <button class="go" type="submit">Match</button>
-        </form>
-      </div>
-      <div id="matchOutput" style="display:none">
-        <div class="matchNames" id="matchNames"></div>
-        <div class="scoreWrap"><div class="scoreNum"><span id="scoreNum">0</span><span class="pc">%</span></div></div>
-        <div class="heartline"><i id="heartfill"></i></div>
-        <p class="verdict" id="verdict"></p>
-        <div class="actions">
-          <button class="act primary" id="shareMatchBtn">Share match</button>
-          <button class="act" id="againMatchBtn">Another</button>
-        </div>
-      </div>
+  <!-- MATCH: full-screen reveal over the live aura -->
+  <section id="matchView">
+    <div class="mNames" id="mNames"></div>
+    <div class="mScore"><span id="mScoreNum">0</span><span class="pc">%</span></div>
+    <div class="mHeart"><i id="mHeart"></i></div>
+    <p class="mVerdict" id="mVerdict"></p>
+    <div class="actions">
+      <button class="act primary" id="shareMatchBtn">Share match</button>
+      <button class="act" id="newMatchBtn">Another</button>
+      <button class="act" id="backBtn">My aura</button>
     </div>
+  </section>
+
+  <!-- MATCH: slim name entry bar -->
+  <div class="matchbar" id="matchbar">
+    <form id="matchForm">
+      <input id="matchName" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
+             placeholder="their name…" maxlength="40" aria-label="Their name" />
+      <button class="go" type="submit">Match 💞</button>
+    </form>
+    <button class="mclose" id="matchClose" aria-label="Close">×</button>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -327,32 +332,40 @@
   let gl=null, prog=null, uni={}, useGL=false, renderScale=0.7;
   const FRAG=`
   precision highp float;
-  uniform vec2 u_res; uniform float u_time; uniform float u_intro;
-  uniform vec3 u_c1,u_c2,u_c3; uniform vec2 u_center;
+  uniform vec2 u_res; uniform float u_time; uniform float u_intro; uniform float u_match;
+  uniform vec2 u_cA,u_cB;
+  uniform vec3 u_a1,u_a2,u_a3,u_b1,u_b2,u_b3;
   float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
   float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
     float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
     return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);}
   float fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);
     for(int i=0;i<5;i++){v+=a*noise(p);p=m*p;a*=0.5;}return v;}
+  vec3 sat(vec3 c){float l=dot(c,vec3(0.299,0.587,0.114));return mix(vec3(l),c,1.4);}
   void main(){
-    vec2 uv=(gl_FragCoord.xy-u_center)/u_res.y;
+    vec2 sc=gl_FragCoord.xy/u_res.y;
     float t=u_time*0.07;
-    vec2 q=vec2(fbm(uv*2.0+t), fbm(uv*2.0+vec2(5.2,1.3)-t));
-    vec2 r=vec2(fbm(uv*2.0+2.0*q+vec2(1.7,9.2)+0.15*t), fbm(uv*2.0+2.0*q+vec2(8.3,2.8)-0.12*t));
-    float f=fbm(uv*2.0+2.0*r);
-    vec3 col=mix(u_c1,u_c2,clamp(f*1.6,0.0,1.0));
-    col=mix(col,u_c3,clamp(length(q)*0.9,0.0,1.0));
-    col=mix(col,vec3(1.0),pow(clamp(f-0.22,0.0,1.0),3.0)*0.35);
-    float luma=dot(col,vec3(0.299,0.587,0.114));
-    col=mix(vec3(luma),col,1.4);
-    float d=length(uv);
-    float orb=smoothstep(0.64,0.02,d);
-    float glow=exp(-d*2.7)*0.65;
-    float bright=orb*(0.5+0.95*f)+glow;
-    col*=bright*u_intro;
+    vec2 q=vec2(fbm(sc*2.0+t), fbm(sc*2.0+vec2(5.2,1.3)-t));
+    vec2 r=vec2(fbm(sc*2.0+2.0*q+vec2(1.7,9.2)+0.15*t), fbm(sc*2.0+2.0*q+vec2(8.3,2.8)-0.12*t));
+    float f=fbm(sc*2.0+2.0*r);
+    float pop=pow(clamp(f-0.22,0.0,1.0),3.0)*0.35;
+    vec3 colA=mix(u_a1,u_a2,clamp(f*1.6,0.0,1.0)); colA=mix(colA,u_a3,clamp(length(q)*0.9,0.0,1.0)); colA=sat(mix(colA,vec3(1.0),pop));
+    vec3 colB=mix(u_b1,u_b2,clamp(f*1.6,0.0,1.0)); colB=mix(colB,u_b3,clamp(length(q)*0.9,0.0,1.0)); colB=sat(mix(colB,vec3(1.0),pop));
+    vec2 pa=(gl_FragCoord.xy-u_cA)/u_res.y; float da=length(pa);
+    vec2 pb=(gl_FragCoord.xy-u_cB)/u_res.y; float db=length(pb);
+    float bA=smoothstep(0.64,0.02,da)*(0.5+0.95*f)+exp(-da*2.7)*0.65;
+    float bB=smoothstep(0.64,0.02,db)*(0.5+0.95*f)+exp(-db*2.7)*0.65;
+    float wA=bA, wB=bB*u_match;
+    float ws=wA+wB+0.0001;
+    vec3 cmix=(colA*wA+colB*wB)/ws;          // blend the two auras by hue, not by blowing out
+    float inten=max(wA,wB)+0.45*min(wA,wB);  // overlap adds a little brightness
+    vec3 col=cmix*inten;
+    col+=vec3(1.0)*(bA*bB*u_match)*0.32;      // soft seam where the auras meet
     float star=pow(hash(floor(gl_FragCoord.xy*0.7)),120.0);
     col+=star*(0.5+0.5*sin(u_time*3.0+hash(floor(gl_FragCoord.xy))*6.28))*0.7;
+    float mx=max(col.r,max(col.g,col.b));
+    col*=1.0/(1.0+mx*0.7);                    // soft tone-map: tame highlights, keep hue
+    col*=u_intro;
     gl_FragColor=vec4(col,1.0);
   }`;
   const VERT=`attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}`;
@@ -370,16 +383,22 @@
     const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
     gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
     const loc=gl.getAttribLocation(prog,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-    ['u_res','u_time','u_intro','u_c1','u_c2','u_c3','u_center'].forEach(n=>uni[n]=gl.getUniformLocation(prog,n));
+    ['u_res','u_time','u_intro','u_match','u_cA','u_cB','u_a1','u_a2','u_a3','u_b1','u_b2','u_b3'].forEach(n=>uni[n]=gl.getUniformLocation(prog,n));
     return true;
   }
 
   /* current palette + state */
   let cur=null;
   let pal={c1:[0.55,0.45,0.95],c2:[0.0,0.88,1.0],c3:[1.0,0.37,0.78]};
+  let palB={c1:[1,1,1],c2:[1,1,1],c3:[1,1,1]};
   let introMix=0;               // 0 idle ambient ... up to 1
   let targetIntro=0.62;         // ambient brightness before reveal
   let centerY=0.40;             // fraction from top of orb center
+  // two-orb match animation state (screen px, top-left origin)
+  let cAx=0,cAy=0,cBx=0,cBy=0,uMatch=0;
+  let mAnim=null;               // {start,dur,sep,burst}
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const easeOut=t=>1-Math.pow(1-t,3);
 
   function setPalette(d){
     if(d){ pal={c1:d.rgb1,c2:d.rgb2,c3:d.rgb3}; }
@@ -446,16 +465,36 @@
   if(!useGL){ g2=glc.getContext('2d'); buildBlobs(); }
   resize(); addEventListener('resize',()=>{resize(); if(!useGL)buildBlobs();});
   initDust();
+  cAx=innerWidth*0.5; cAy=innerHeight*0.40; cBx=innerWidth*1.2; cBy=innerHeight*0.30;
   requestAnimationFrame(function loop(now){
     requestAnimationFrame(loop);
     const t=(now-t0)/1000;
     introMix+=(targetIntro-introMix)*0.05;
+
+    // ---- position the one/two auras ----
+    if(mAnim){
+      const p=easeOut(Math.min(1,(now-mAnim.start)/mAnim.dur));
+      cAx=lerp(W*0.5, W*0.5-mAnim.sep, p);
+      cBx=lerp(W*1.18, W*0.5+mAnim.sep, p);
+      cAy=cBy=H*0.30;
+      uMatch+=(p-uMatch)*0.2;
+      if(!mAnim.burst && p>0.62){ spawnBurst(W*0.5,H*0.30); buzz([12,45,22]); mAnim.burst=true; }
+    } else {
+      const tx=W*0.5, ty=H*centerY;
+      cAx+=(tx-cAx)*0.1; cAy+=(ty-cAy)*0.1;
+      uMatch+=(0-uMatch)*0.1;
+    }
+
     if(useGL){
+      const sx=glc.width/W, sy=glc.height/H;
       gl.uniform2f(uni.u_res,glc.width,glc.height);
       gl.uniform1f(uni.u_time,t);
       gl.uniform1f(uni.u_intro,introMix);
-      gl.uniform2f(uni.u_center,glc.width*0.5,glc.height*(1.0-centerY));
-      gl.uniform3fv(uni.u_c1,pal.c1);gl.uniform3fv(uni.u_c2,pal.c2);gl.uniform3fv(uni.u_c3,pal.c3);
+      gl.uniform1f(uni.u_match,uMatch);
+      gl.uniform2f(uni.u_cA, cAx*sx, glc.height-cAy*sy);
+      gl.uniform2f(uni.u_cB, cBx*sx, glc.height-cBy*sy);
+      gl.uniform3fv(uni.u_a1,pal.c1);gl.uniform3fv(uni.u_a2,pal.c2);gl.uniform3fv(uni.u_a3,pal.c3);
+      gl.uniform3fv(uni.u_b1,palB.c1);gl.uniform3fv(uni.u_b2,palB.c2);gl.uniform3fv(uni.u_b3,palB.c3);
       gl.drawArrays(gl.TRIANGLES,0,3);
     } else { draw2Dreal(t); }
     // FX overlay
@@ -493,6 +532,8 @@
 
   function render(data,push){
     cur=data; setPalette(data); if(!useGL)buildBlobs();
+    document.body.classList.remove('match-mode'); mAnim=null;
+    document.getElementById('matchbar').classList.remove('show');
     targetIntro=1.0; centerY=0.27;             // glow behind the aura name
     document.body.style.setProperty('--c1',data.c1);
     document.body.style.setProperty('--c2',data.c2);
@@ -527,6 +568,8 @@
 
   function reset(){
     result.classList.remove('show');document.body.classList.remove('result-mode');
+    document.body.classList.remove('match-mode');mAnim=null;
+    const mb=document.getElementById('matchbar');if(mb)mb.classList.remove('show');
     intro.style.opacity='1';intro.style.transform='none';intro.style.pointerEvents='auto';
     cur=null;targetIntro=0.62;centerY=0.40;pal={c1:[0.55,0.45,0.95],c2:[0.0,0.88,1.0],c3:[1.0,0.37,0.78]};
     if(!useGL)buildBlobs();
@@ -547,37 +590,54 @@
     try{await navigator.clipboard.writeText(url);toast('Link copied — go make someone curious ✦');}catch(_){toast(url);}
   });
 
-  /* ===== MATCH ===== */
-  const modal=document.getElementById('modal');
-  const matchInputBox=document.getElementById('matchInput');
-  const matchOutputBox=document.getElementById('matchOutput');
+  /* ===== MATCH (animated in the live aura) ===== */
+  const matchbar=document.getElementById('matchbar');
   const matchNameInput=document.getElementById('matchName');
+  const matchView=document.getElementById('matchView');
   let lastMatch=null;
 
-  function openModal(){modal.classList.add('show');matchInputBox.style.display='';matchOutputBox.style.display='none';
-    setTimeout(()=>matchNameInput.focus(),250);}
-  function closeModal(){modal.classList.remove('show');}
-  document.getElementById('matchBtn').addEventListener('click',openModal);
-  document.getElementById('closeX').addEventListener('click',closeModal);
-  modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
-  document.getElementById('againMatchBtn').addEventListener('click',()=>{matchInputBox.style.display='';matchOutputBox.style.display='none';matchNameInput.value='';matchNameInput.focus();});
+  function openBar(){matchbar.classList.add('show');setTimeout(()=>matchNameInput.focus(),250);}
+  function closeBar(){matchbar.classList.remove('show');matchNameInput.blur();}
+  document.getElementById('matchBtn').addEventListener('click',openBar);
+  document.getElementById('matchClose').addEventListener('click',closeBar);
+  document.getElementById('newMatchBtn').addEventListener('click',()=>{matchNameInput.value='';openBar();});
+  document.getElementById('backBtn').addEventListener('click',exitMatch);
 
-  function showMatch(nameA,nameB,push){
+  function startMatch(nameA,nameB,push){
+    const d2=generate(nameB);
+    palB={c1:d2.rgb1,c2:d2.rgb2,c3:d2.rgb3};
     const m=matchOf(nameA,nameB); lastMatch={a:nameA,b:nameB,...m};
-    matchInputBox.style.display='none';matchOutputBox.style.display='';
-    document.getElementById('matchNames').textContent=(nameA||'you').toUpperCase()+'  ✕  '+(nameB||'them').toUpperCase();
-    document.getElementById('verdict').textContent=m.verdict;
-    const num=document.getElementById('scoreNum'); animateCount(num,m.pct,1200);
-    const hf=document.getElementById('heartfill');hf.style.width='0';
+
+    // gradient that literally blends both auras' colors
+    document.body.style.setProperty('--c1', (cur?cur.c1:d2.c1));
+    document.body.style.setProperty('--c2', d2.c2);
+
+    document.getElementById('mNames').textContent=(nameA||'you').toUpperCase()+'  ✕  '+(nameB||'them').toUpperCase();
+    document.getElementById('mVerdict').textContent=m.verdict;
+
+    closeBar();
+    document.body.classList.add('match-mode');
+    targetIntro=1.0;
+    mAnim={start:performance.now(),dur:1600,sep:(1-m.pct/100)*0.16*H,burst:false};
+
+    const num=document.getElementById('mScoreNum'); num.textContent='0'; animateCount(num,m.pct,1600);
+    const hf=document.getElementById('mHeart'); hf.style.width='0';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{hf.style.width=m.pct+'%';}));
-    buzz([10,40,20]);
+    buzz(15);
+
     if(push){const url=new URL(location.href);
       if(nameA)url.searchParams.set('name',nameA);
-      url.searchParams.set('match',nameB);history.pushState({},'',url);}
+      url.searchParams.set('match',nameB);history.pushState({match:nameB},'',url);}
+  }
+  function exitMatch(){
+    document.body.classList.remove('match-mode');
+    mAnim=null;
+    if(cur){document.body.style.setProperty('--c1',cur.c1);document.body.style.setProperty('--c2',cur.c2);}
+    const url=new URL(location.href);url.searchParams.delete('match');history.pushState({},'',url);
   }
   document.getElementById('matchForm').addEventListener('submit',e=>{
     e.preventDefault();const other=matchNameInput.value.trim();if(!other)return;
-    const me=cur?cur.name:'';showMatch(me,other,true);
+    startMatch(cur?cur.name:'',other,true);
   });
   document.getElementById('shareMatchBtn').addEventListener('click',async()=>{
     if(!lastMatch)return;buzz(12);
@@ -628,14 +688,16 @@
 
   addEventListener('popstate',()=>{
     const u=new URL(location.href);const n=u.searchParams.get('name');const m=u.searchParams.get('match');
-    if(n!==null){nameInput.value=n;render(generate(n),false);if(m!==null){openModal();showMatch(n,m,false);}}
-    else{closeModal();reset();}
+    if(n!==null){
+      if(!cur||cur.name!==n){nameInput.value=n;render(generate(n),false);}
+      if(m!==null){startMatch(n,m,false);} else { if(document.body.classList.contains('match-mode'))exitMatch(); }
+    } else { reset(); }
   });
 
   // deep link
   const u=new URL(location.href);const initName=u.searchParams.get('name');const initMatch=u.searchParams.get('match');
   if(initName!==null){nameInput.value=initName;render(generate(initName),false);
-    if(initMatch!==null){openModal();showMatch(initName,initMatch,false);}}
+    if(initMatch!==null){startMatch(initName,initMatch,false);}}
   else{setTimeout(()=>nameInput.focus(),600);}
 })();
 </script>
