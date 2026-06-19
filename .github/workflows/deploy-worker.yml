@@ -2,7 +2,7 @@ name: Deploy Worker
 
 on:
   push:
-    branches: ["claude/viral-web-project-xaw4wj"]
+    branches: ["claude/viral-web-project-xaw4wj", "claude/keen-knuth-a35xta"]
     paths:
       - "worker/**"
       - ".github/workflows/deploy-worker.yml"
