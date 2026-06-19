@@ -33,7 +33,7 @@
     --c1:#ff5ec7; --c2:#7b5cff;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;height:100%}
+  html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none}
   body{
     background:var(--bg);color:var(--ink);
     font-family:'Sora',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
@@ -52,7 +52,9 @@
   .wrap{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;
     padding:24px 22px calc(76px + env(safe-area-inset-bottom));
-    overflow-y:auto;-webkit-overflow-scrolling:touch}
+    overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  /* intro never scrolls — only the (taller) result/match content may */
+  body:not(.result-mode):not(.match-mode) .wrap{overflow-y:hidden;justify-content:center}
   body.result-mode .wrap{justify-content:flex-start;padding-top:34px}
 
   /* INTRO */
@@ -163,27 +165,55 @@
   .field input#name{width:100%}
   .go{width:100%}
 
-  /* DATE OF BIRTH — segmented, auto-advancing */
-  .dob{display:flex;align-items:center;justify-content:center;gap:4px;
-    padding:6px 12px;border-radius:18px;border:1px solid var(--line);background:var(--glass);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border .2s,box-shadow .2s}
-  .dob:focus-within{border-color:rgba(123,92,255,.85);box-shadow:0 0 0 4px rgba(123,92,255,.16)}
-  .dob.shake{animation:shake .4s}
+  /* DATE PILL — opens the wheel picker */
+  .dobtrigger{display:flex;align-items:center;gap:12px;width:100%;padding:16px 20px;border-radius:18px;
+    border:1px solid var(--line);background:var(--glass);color:#726e9d;font-family:inherit;font-size:17px;
+    text-align:left;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    transition:border .2s,background .2s,color .2s,box-shadow .2s,transform .12s}
+  .dobtrigger:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+  .dobtrigger:active{transform:scale(.99)}
+  .dobtrigger.set{color:var(--ink)}
+  .dobtrigger.shake{animation:shake .4s}
   @keyframes shake{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-6px)}}
-  .dob .seg{width:62px;flex:0 0 auto;text-align:center;padding:15px 4px;border:none;border-radius:12px;
-    background:transparent;color:var(--ink);font-family:inherit;font-size:21px;font-weight:600;
-    letter-spacing:.04em;font-variant-numeric:tabular-nums;outline:none;backdrop-filter:none;-webkit-backdrop-filter:none}
-  .dob .seg.seg-y{width:96px}
-  .dob .seg:focus{background:rgba(123,92,255,.16);box-shadow:none}
-  .dob .seg::placeholder{color:#5d5a86;font-weight:500;letter-spacing:.06em}
-  .dob .sep{color:#534f7d;font-size:19px;user-select:none}
-  .dcap{display:flex;justify-content:center;gap:34px;margin-top:7px;
-    font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#5d5a86}
-  .signpeek{height:22px;margin-top:14px;color:#e7e3ff;font-size:14.5px;letter-spacing:.03em;
+  .dobtrigger .dt-ico{font-size:20px;line-height:1}
+  .dobtrigger .dt-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .signpeek{height:22px;margin-top:16px;color:#e7e3ff;font-size:14.5px;letter-spacing:.03em;
     opacity:0;transform:translateY(4px);transition:opacity .45s ease,transform .45s ease}
   .signpeek.show{opacity:1;transform:none}
   .signpeek .gl{font-size:19px;margin-right:7px;vertical-align:-2px}
   .signpeek .dot{opacity:.5;margin:0 8px}
+
+  /* WHEEL PICKER — bottom sheet */
+  .sheet{position:fixed;inset:0;z-index:20;visibility:hidden;pointer-events:none}
+  .sheet.show{visibility:visible;pointer-events:auto}
+  .sheet-back{position:absolute;inset:0;background:rgba(3,3,9,.62);opacity:0;transition:opacity .3s;
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .sheet.show .sheet-back{opacity:1}
+  .sheet-card{position:absolute;left:0;right:0;bottom:0;z-index:1;max-width:480px;margin:0 auto;
+    background:linear-gradient(180deg,#15132a,#0c0a18);border-top:1px solid var(--line);
+    border-radius:26px 26px 0 0;padding:14px 18px calc(18px + env(safe-area-inset-bottom));
+    box-shadow:0 -20px 60px rgba(0,0,0,.6);transform:translateY(102%);
+    transition:transform .42s cubic-bezier(.2,.8,.2,1)}
+  .sheet.show .sheet-card{transform:none}
+  .sheet-card::before{content:"";display:block;width:42px;height:5px;border-radius:3px;
+    background:rgba(255,255,255,.18);margin:2px auto 12px}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;margin:0 4px 4px}
+  .sheet-title{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .sheet-sign{font-size:15px;font-weight:600;color:#fff;min-height:20px}
+  .sheet-sign .gl{margin-right:6px}
+  .picker{position:relative;display:flex;gap:6px;height:180px;margin:6px 0 14px;
+    -webkit-mask-image:linear-gradient(180deg,transparent,#000 24%,#000 76%,transparent);
+    mask-image:linear-gradient(180deg,transparent,#000 24%,#000 76%,transparent)}
+  .pcol{flex:1;min-width:0;height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;
+    scrollbar-width:none;-ms-overflow-style:none;text-align:center;position:relative;z-index:1}
+  .pcol::-webkit-scrollbar{display:none}
+  .pcol::before,.pcol::after{content:"";display:block;height:72px}
+  .pitem{height:36px;line-height:36px;scroll-snap-align:center;font-size:19px;font-weight:600;
+    color:#6f6b9b;font-variant-numeric:tabular-nums;cursor:pointer;transition:color .15s,transform .15s}
+  .pitem.sel{color:#fff;transform:scale(1.06)}
+  .pband{position:absolute;left:0;right:0;top:50%;height:36px;transform:translateY(-50%);z-index:0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:rgba(123,92,255,.10);border-radius:10px;pointer-events:none}
 
   /* RESULT: real-fact cards */
   .astro{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:4px auto 20px;max-width:500px}
@@ -218,9 +248,7 @@
   .matchbar form{flex-direction:column;gap:9px}
   .matchbar .mrow{display:flex;gap:8px;align-items:center}
   .matchbar .mrow input{flex:1;min-width:0;padding:13px 16px;border-radius:13px;font-size:16px}
-  .matchbar .dob{flex:1;padding:3px 8px}
-  .matchbar .dob .seg{width:50px;padding:11px 2px;font-size:17px}
-  .matchbar .dob .seg.seg-y{width:72px}
+  .matchbar .dobtrigger{padding:13px 16px;font-size:15px}
   .matchbar .go{width:100%;padding:13px 16px;border-radius:13px;font-size:14px}
   .mclose{position:absolute;top:8px;right:10px;font-size:22px;color:var(--muted);background:none;padding:4px 8px;line-height:1}
 
@@ -233,7 +261,7 @@
     box-shadow:0 0 8px var(--c1);transform-origin:left;animation:grow .9s cubic-bezier(.2,.85,.25,1) both}
   .mBreak .bpct{text-align:right;font-variant-numeric:tabular-nums;color:#d3d0f2;font-weight:600}
 
-  @media (max-width:440px){ .dob .seg{width:54px} .dob .seg.seg-y{width:84px} }
+  @media (max-width:440px){ .picker{height:168px} }
   @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition-duration:.01ms!important} }
 </style>
 </head>
@@ -252,14 +280,9 @@
       <form class="field" id="form">
         <input id="name" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
                placeholder="your name…" maxlength="40" aria-label="Your name" />
-        <div class="dob" id="dob">
-          <input class="seg" data-seg="d" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="DD" aria-label="Day of birth" />
-          <span class="sep">·</span>
-          <input class="seg" data-seg="m" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="MM" aria-label="Month of birth" />
-          <span class="sep">·</span>
-          <input class="seg seg-y" data-seg="y" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="YYYY" aria-label="Year of birth" />
-        </div>
-        <div class="dcap"><span>Day</span><span>Month</span><span>Year</span></div>
+        <button type="button" class="dobtrigger" id="dobTrigger" aria-label="Pick your birth date">
+          <span class="dt-ico">🎂</span><span class="dt-label" id="dobLabel">Date of birth</span>
+        </button>
         <button class="go" type="submit">Reveal ✦</button>
       </form>
       <div class="signpeek" id="signpeek" aria-live="polite"></div>
@@ -306,17 +329,31 @@
                placeholder="their name…" maxlength="40" aria-label="Their name" />
       </div>
       <div class="mrow">
-        <div class="dob" id="matchDob">
-          <input class="seg" data-seg="d" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="DD" aria-label="Their day of birth" />
-          <span class="sep">·</span>
-          <input class="seg" data-seg="m" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="MM" aria-label="Their month of birth" />
-          <span class="sep">·</span>
-          <input class="seg seg-y" data-seg="y" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="YYYY" aria-label="Their year of birth" />
-        </div>
+        <button type="button" class="dobtrigger" id="matchDobTrigger" aria-label="Pick their birth date">
+          <span class="dt-ico">🎂</span><span class="dt-label" id="matchDobLabel">Their birth date</span>
+        </button>
       </div>
       <button class="go" type="submit">Match 💞</button>
     </form>
     <button class="mclose" id="matchClose" aria-label="Close">×</button>
+  </div>
+
+  <!-- WHEEL PICKER bottom sheet (shared) -->
+  <div class="sheet" id="sheet" aria-hidden="true">
+    <div class="sheet-back" id="sheetBack"></div>
+    <div class="sheet-card" role="dialog" aria-label="Pick a birth date">
+      <div class="sheet-head">
+        <div class="sheet-title" id="sheetTitle">Birth date</div>
+        <div class="sheet-sign" id="sheetSign"></div>
+      </div>
+      <div class="picker" id="picker">
+        <div class="pcol" id="colD" aria-label="Day"></div>
+        <div class="pcol" id="colM" aria-label="Month"></div>
+        <div class="pcol" id="colY" aria-label="Year"></div>
+        <div class="pband"></div>
+      </div>
+      <button class="go sheet-done" id="sheetDone" type="button">Done</button>
+    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -784,7 +821,7 @@
   const nameInput=document.getElementById('name');
   function buzz(ms){ if(navigator.vibrate) try{navigator.vibrate(ms);}catch(_){ } }
 
-  /* ---- segmented date-of-birth input (auto-advance + live) ---- */
+  /* ---- date helpers ---- */
   function validDate(y,m,d){
     if(!y||!m||!d) return false;
     if(m<1||m>12||d<1||d>31) return false;
@@ -792,49 +829,6 @@
     const dt=new Date(y,m-1,d);
     return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d;
   }
-  function wireDate(root,onChange){
-    const segs=[].slice.call(root.querySelectorAll('.seg'));
-    const dd=segs[0],mm=segs[1],yy=segs[2];
-    function get(){
-      const d=+dd.value,m=+mm.value,y=+yy.value;
-      if(dd.value&&mm.value&&yy.value.length===4&&validDate(y,m,d)) return {y,m,d};
-      return null;
-    }
-    function fire(){ if(onChange) onChange(get()); }
-    segs.forEach((s,i)=>{
-      s.addEventListener('input',()=>{
-        s.value=s.value.replace(/\D/g,'');
-        if(s.value.length>=s.maxLength&&i<segs.length-1) segs[i+1].focus();
-        fire();
-      });
-      s.addEventListener('keydown',e=>{
-        if(e.key==='Backspace'&&!s.value&&i>0){ segs[i-1].focus(); }
-      });
-      s.addEventListener('paste',e=>{
-        const txt=((e.clipboardData||window.clipboardData).getData('text')||'');
-        const nums=txt.match(/\d+/g);
-        if(nums&&nums.length>=3){ e.preventDefault();
-          dd.value=nums[0].slice(0,2); mm.value=nums[1].slice(0,2); yy.value=nums[2].slice(0,4);
-          fire(); yy.focus();
-        }
-      });
-    });
-    return {
-      get,
-      set(dob){ if(dob){dd.value=String(dob.d);mm.value=String(dob.m);yy.value=String(dob.y);} else {dd.value=mm.value=yy.value='';} fire(); },
-      clear(){ dd.value=mm.value=yy.value=''; fire(); },
-      focus(){ dd.focus(); },
-      shake(){ root.classList.add('shake'); setTimeout(()=>root.classList.remove('shake'),420); }
-    };
-  }
-  const signpeek=document.getElementById('signpeek');
-  const introDate=wireDate(document.getElementById('dob'),dob=>{
-    if(dob){ const s=sunSign(dob.m,dob.d);
-      signpeek.innerHTML=`<span class="gl">${s.glyph}</span>${s.name}<span class="dot">·</span>${s.el} ${s.mod.toLowerCase()}`;
-      signpeek.classList.add('show');
-    } else { signpeek.classList.remove('show'); }
-  });
-  const matchDate=wireDate(document.getElementById('matchDob'));
   const pad2=n=>String(n).padStart(2,'0');
   function dobStr(dob){ return dob? `${dob.y}${pad2(dob.m)}${pad2(dob.d)}` : ''; }
   function parseDob(str){
@@ -844,6 +838,114 @@
     const y=+s.slice(0,4),m=+s.slice(4,6),d=+s.slice(6,8);
     return validDate(y,m,d)?{y,m,d}:null;
   }
+
+  /* ---- wheel date picker (bottom sheet) ---- */
+  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ITEM=36, NOW_Y=new Date().getFullYear();
+  const YEARS=[]; for(let y=1925;y<=NOW_Y;y++) YEARS.push(y);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const daysIn=(m,y)=>new Date(y,m,0).getDate();
+  const signpeek=document.getElementById('signpeek');
+  const PK={
+    sheet:document.getElementById('sheet'), back:document.getElementById('sheetBack'),
+    done:document.getElementById('sheetDone'), title:document.getElementById('sheetTitle'),
+    sign:document.getElementById('sheetSign'),
+    colD:document.getElementById('colD'), colM:document.getElementById('colM'), colY:document.getElementById('colY'),
+    sel:{d:1,m:1,y:2000}, lastIdx:{d:-1,m:-1,y:-1}, builtDays:0, onConfirm:null, ready:false
+  };
+  function buildCol(col,items){ col.innerHTML=items.map((t,i)=>`<div class="pitem" data-i="${i}">${t}</div>`).join(''); }
+  function rebuildDays(){
+    const dim=daysIn(PK.sel.m,PK.sel.y);
+    if(PK.builtDays!==dim){ const a=[]; for(let d=1;d<=dim;d++) a.push(d); buildCol(PK.colD,a); PK.builtDays=dim; }
+    if(PK.sel.d>dim) PK.sel.d=dim;
+  }
+  function snap(col,i){ col.scrollTop=i*ITEM; }
+  function highlight(col,i){ const c=col.children; for(let k=0;k<c.length;k++) c[k].classList.toggle('sel',k===i); }
+  function updateSheetSign(){ const s=sunSign(PK.sel.m,PK.sel.d);
+    PK.sign.innerHTML=`<span class="gl">${s.glyph}</span>${s.name}`; }
+  const scrollT={};
+  function colScroll(key){
+    const col=PK['col'+key.toUpperCase()], n=col.children.length;
+    const i=clamp(Math.round(col.scrollTop/ITEM),0,n-1);
+    highlight(col,i);
+    clearTimeout(scrollT[key]); scrollT[key]=setTimeout(()=>settle(key),120);
+  }
+  function settle(key){
+    const col=PK['col'+key.toUpperCase()], n=col.children.length;
+    let i=clamp(Math.round(col.scrollTop/ITEM),0,n-1);
+    snap(col,i); highlight(col,i);
+    const changed=i!==PK.lastIdx[key]; PK.lastIdx[key]=i;
+    if(key==='d') PK.sel.d=i+1;
+    else if(key==='m'){ PK.sel.m=i+1; rebuildDays(); snap(PK.colD,PK.sel.d-1); highlight(PK.colD,PK.sel.d-1); }
+    else { PK.sel.y=YEARS[i]; rebuildDays(); snap(PK.colD,PK.sel.d-1); highlight(PK.colD,PK.sel.d-1); }
+    updateSheetSign(); if(changed) buzz(5);
+  }
+  function finalizeFromScroll(){
+    const mi=clamp(Math.round(PK.colM.scrollTop/ITEM),0,11);
+    const yi=clamp(Math.round(PK.colY.scrollTop/ITEM),0,YEARS.length-1);
+    PK.sel.m=mi+1; PK.sel.y=YEARS[yi]; rebuildDays();
+    const di=clamp(Math.round(PK.colD.scrollTop/ITEM),0,PK.colD.children.length-1);
+    PK.sel.d=di+1;
+  }
+  function openPicker(opts){
+    PK.onConfirm=opts.onConfirm; PK.title.textContent=opts.title||'Birth date';
+    const init=opts.initial||{d:1,m:1,y:2000};
+    PK.sel={d:init.d,m:init.m,y:init.y}; PK.lastIdx={d:-1,m:-1,y:-1};
+    if(!PK.ready){ buildCol(PK.colM,MONTHS); buildCol(PK.colY,YEARS); PK.ready=true; }
+    PK.builtDays=0; rebuildDays();
+    PK.sheet.classList.add('show'); PK.sheet.setAttribute('aria-hidden','false');
+    setTimeout(()=>{
+      const yi=YEARS.indexOf(PK.sel.y);
+      snap(PK.colD,PK.sel.d-1); highlight(PK.colD,PK.sel.d-1);
+      snap(PK.colM,PK.sel.m-1); highlight(PK.colM,PK.sel.m-1);
+      snap(PK.colY,yi); highlight(PK.colY,yi);
+      PK.lastIdx={d:PK.sel.d-1,m:PK.sel.m-1,y:yi};
+      updateSheetSign();
+    },40);
+  }
+  function closePicker(){ PK.sheet.classList.remove('show'); PK.sheet.setAttribute('aria-hidden','true'); }
+  PK.colD.addEventListener('scroll',()=>colScroll('d'));
+  PK.colM.addEventListener('scroll',()=>colScroll('m'));
+  PK.colY.addEventListener('scroll',()=>colScroll('y'));
+  [PK.colD,PK.colM,PK.colY].forEach(col=>col.addEventListener('click',e=>{
+    const it=e.target.closest('.pitem'); if(!it) return;
+    col.scrollTo({top:(+it.dataset.i)*ITEM,behavior:'smooth'});
+  }));
+  PK.back.addEventListener('click',closePicker);
+  PK.done.addEventListener('click',()=>{
+    finalizeFromScroll();
+    const dob=validDate(PK.sel.y,PK.sel.m,PK.sel.d)?{y:PK.sel.y,m:PK.sel.m,d:PK.sel.d}:null;
+    closePicker(); buzz(12); if(PK.onConfirm) PK.onConfirm(dob);
+  });
+
+  /* ---- date pills (intro + match) ---- */
+  let introDob=null, matchDob=null;
+  const dobTrigger=document.getElementById('dobTrigger'), dobLabel=document.getElementById('dobLabel');
+  const matchDobTrigger=document.getElementById('matchDobTrigger'), matchDobLabel=document.getElementById('matchDobLabel');
+  const fmtDob=dob=>dob?`${dob.d} ${MONTHS[dob.m-1]} ${dob.y}`:null;
+  function setIntroDob(dob){
+    introDob=dob;
+    dobLabel.textContent=dob?fmtDob(dob):'Date of birth';
+    dobTrigger.classList.toggle('set',!!dob);
+    if(dob){ const s=sunSign(dob.m,dob.d);
+      signpeek.innerHTML=`<span class="gl">${s.glyph}</span>${s.name}<span class="dot">·</span>${s.el} ${s.mod.toLowerCase()}`;
+      signpeek.classList.add('show');
+    } else signpeek.classList.remove('show');
+  }
+  function setMatchDob(dob){
+    matchDob=dob;
+    matchDobLabel.textContent=dob?fmtDob(dob):'Their birth date';
+    matchDobTrigger.classList.toggle('set',!!dob);
+  }
+  const defInit=()=>({d:1,m:1,y:2000});
+  dobTrigger.addEventListener('click',()=>openPicker({title:'Your birth date',initial:introDob||defInit(),onConfirm:setIntroDob}));
+  matchDobTrigger.addEventListener('click',()=>openPicker({title:'Their birth date',initial:matchDob||defInit(),onConfirm:setMatchDob}));
+  const introDate={ get:()=>introDob, set:setIntroDob, clear:()=>setIntroDob(null),
+    shake(){dobTrigger.classList.add('shake');setTimeout(()=>dobTrigger.classList.remove('shake'),420);},
+    focus(){dobTrigger.click();} };
+  const matchDate={ get:()=>matchDob, set:setMatchDob, clear:()=>setMatchDob(null),
+    shake(){matchDobTrigger.classList.add('shake');setTimeout(()=>matchDobTrigger.classList.remove('shake'),420);},
+    focus(){matchDobTrigger.click();} };
   function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
   function animateCount(el,to,dur){
