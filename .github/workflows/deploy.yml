@@ -2,7 +2,7 @@ name: Deploy AURA to GitHub Pages
 
 on:
   push:
-    branches: ["claude/viral-web-project-xaw4wj"]
+    branches: ["claude/viral-web-project-xaw4wj", "claude/keen-knuth-a35xta"]
   workflow_dispatch:
 
 permissions:
