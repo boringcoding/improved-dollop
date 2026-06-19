@@ -1,5 +1,5 @@
 import { ImageResponse } from 'workers-og';
-import { generate, matchOf } from './aura.js';
+import { generate, synastry, parseDob } from './aura.js';
 
 import fontRegular from '../fonts/Poppins-Regular.ttf';
 import fontSemi from '../fonts/Poppins-SemiBold.ttf';
@@ -15,6 +15,10 @@ const FONTS = [
 ];
 
 const esc = s => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const enc = encodeURIComponent;
+const dobParam = dob => `${dob.y}${String(dob.m).padStart(2,'0')}${String(dob.d).padStart(2,'0')}`;
+// Satori has no emoji font — strip emoji so OG image text doesn't render tofu boxes.
+const noEmoji = s => String(s).replace(/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu,'').replace(/\s+/g,' ').trim();
 
 /* ---------- OG card markup (Satori-friendly HTML) ---------- */
 
@@ -39,7 +43,8 @@ function auraCard(d){
       <div style="display:flex;margin-top:8px;color:#8a86b8;font-size:24px;letter-spacing:3px;">${esc((d.name ? 'THE AURA OF '+d.name : 'THE AURA OF YOU').toUpperCase())}</div>
       <div style="display:flex;margin-top:6px;font-size:84px;line-height:1.04;font-weight:700;
         background-image:linear-gradient(110deg, ${d.c1}, ${d.c2});-webkit-background-clip:text;background-clip:text;color:transparent;">${esc(d.auraName)}</div>
-      <div style="display:flex;margin-top:30px;color:#c9c5ee;font-size:27px;">What does your soul look like?</div>
+      ${d.sign ? `<div style="display:flex;margin-top:22px;color:#d7d4ff;font-size:30px;font-weight:600;">${esc(d.sign.name)} &#183; ${esc(d.sign.el)} &#183; Life Path ${d.lifePath.n}</div>
+      <div style="display:flex;margin-top:6px;color:#8a86b8;font-size:24px;">Year of the ${esc(d.chinese.element)} ${esc(d.chinese.animal)}</div>` : `<div style="display:flex;margin-top:30px;color:#c9c5ee;font-size:27px;">What does your soul look like?</div>`}
     </div>
   </div>`;
 }
@@ -59,7 +64,7 @@ function matchCard(nameA, nameB, dA, dB, m){
     </div>
     <div style="display:flex;font-size:240px;font-weight:700;line-height:1;
       background-image:linear-gradient(110deg, ${dA.c1}, ${dB.c2});-webkit-background-clip:text;background-clip:text;color:transparent;">${m.pct}%</div>
-    <div style="display:flex;position:absolute;bottom:116px;color:#ffffff;font-size:34px;max-width:920px;text-align:center;">${esc(m.verdict)}</div>
+    <div style="display:flex;position:absolute;bottom:116px;color:#ffffff;font-size:34px;max-width:920px;text-align:center;">${esc(noEmoji(m.verdict))}</div>
     <div style="display:flex;position:absolute;bottom:56px;color:#8480ad;font-size:24px;letter-spacing:4px;">AURA · COMPATIBILITY</div>
   </div>`;
 }
@@ -85,22 +90,32 @@ class TextSetter {
 async function rewritePage(request, url){
   const name  = url.searchParams.get('name');
   const match = url.searchParams.get('match');
+  const dob   = parseDob(url.searchParams.get('dob'));
+  const mdob  = parseDob(url.searchParams.get('mdob'));
   const origin = url.origin;
+  const dobQ  = dob ? `&dob=${dobParam(dob)}` : '';
+  const mdobQ = mdob ? `&mdob=${dobParam(mdob)}` : '';
 
   let title, desc, ogImage;
   if(name !== null && match !== null){
-    const m = matchOf(name, match);
-    title = `${name || 'You'} ✕ ${match} — ${m.pct}% aura match · AURA`;
-    desc  = `${m.verdict} ✦ Reveal your aura and match it with anyone.`;
-    ogImage = `${origin}/og?name=${encodeURIComponent(name)}&match=${encodeURIComponent(match)}`;
-  } else if(name !== null){
-    const d = generate(name);
-    title = `${name ? name+"'s" : 'Your'} aura is ${d.auraName} · AURA`;
-    desc  = `${d.auraName} — ${d.rarity}. ✦ What does your soul look like?`;
-    ogImage = `${origin}/og?name=${encodeURIComponent(name)}`;
+    const A = generate(name || '', dob), B = generate(match, mdob);
+    const m = synastry(A, B);
+    title = `${name || 'You'} ✕ ${match} — ${m.pct}% match · AURA`;
+    desc  = `${noEmoji(m.verdict)} ✦ Reveal your sign and match it with anyone.`;
+    ogImage = `${origin}/og?name=${enc(name)}&match=${enc(match)}${dobQ}${mdobQ}`;
+  } else if(name !== null || dob){
+    const d = generate(name || '', dob);
+    if(d.sign){
+      title = `${name ? name+"'s" : 'Your'} aura · ${d.sign.name} ${d.sign.glyph} · AURA`;
+      desc  = `${d.auraName} — ${d.sign.name} ${d.sign.el}, Life Path ${d.lifePath.n}, year of the ${d.chinese.animal}. ✦ What does your soul look like?`;
+    } else {
+      title = `${name ? name+"'s" : 'Your'} aura is ${d.auraName} · AURA`;
+      desc  = `${d.auraName} — ${d.rarity}. ✦ What does your soul look like?`;
+    }
+    ogImage = `${origin}/og?${name !== null ? `name=${enc(name)}` : ''}${dob ? `${name !== null ? '&' : ''}dob=${dobParam(dob)}` : ''}`;
   } else {
     title = 'AURA · What does your soul look like?';
-    desc  = 'Type your name and watch your one-of-a-kind aura come alive — then match it with a friend. ✦';
+    desc  = 'Your name and birth date reveal your real sign, element, life-path number & Chinese zodiac — beautifully visualized. ✦';
     ogImage = `${origin}/og`;
   }
 
@@ -132,10 +147,13 @@ export default {
       if(path === '/og'){
         const name = url.searchParams.get('name');
         const match = url.searchParams.get('match');
+        const dob = parseDob(url.searchParams.get('dob'));
+        const mdob = parseDob(url.searchParams.get('mdob'));
         if(name !== null && match !== null){
-          return ogResponse(matchCard(name, match, generate(name), generate(match), matchOf(name, match)));
+          const A = generate(name || '', dob), B = generate(match, mdob);
+          return ogResponse(matchCard(name, match, A, B, synastry(A, B)));
         }
-        return ogResponse(auraCard(generate(name || '')));
+        return ogResponse(auraCard(generate(name || '', dob)));
       }
 
       if(path === '/' || path === '/index.html'){
