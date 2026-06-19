@@ -53,19 +53,22 @@
     align-items:center;justify-content:center;text-align:center;
     padding:24px 22px calc(76px + env(safe-area-inset-bottom));
     overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-  /* intro never scrolls — only the (taller) result/match content may */
+  /* only one section is ever in flow — inactive ones are display:none, not just transparent */
+  #result{display:none}
   body:not(.result-mode):not(.match-mode) .wrap{overflow-y:hidden;justify-content:center}
-  body.result-mode .wrap{justify-content:flex-start;padding-top:34px}
+  body.result-mode #intro,body.match-mode #intro{display:none}
+  body.result-mode #result{display:block}
+  body.result-mode .wrap{justify-content:flex-start;padding-top:max(28px,env(safe-area-inset-top))}
 
   /* INTRO */
   #intro{max-width:560px;transition:opacity .6s ease, transform .6s ease}
-  .kicker{letter-spacing:.5em;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;
+  .kicker{letter-spacing:.5em;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;
     padding-left:.5em}
-  h1{font-size:clamp(48px,15vw,108px);margin:0;font-weight:800;letter-spacing:-.045em;line-height:.88;
+  h1{font-size:clamp(42px,12.5vw,84px);margin:0;font-weight:800;letter-spacing:-.045em;line-height:.9;
     background:linear-gradient(110deg,#ff5ec7,#7b5cff 42%,#00e0ff 88%);background-size:200% auto;
     -webkit-background-clip:text;background-clip:text;color:transparent;animation:sheen 7s ease-in-out infinite}
   @keyframes sheen{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-  .sub{color:var(--muted);font-size:clamp(15px,4.2vw,18px);margin:20px auto 28px;max-width:400px;line-height:1.55}
+  .sub{color:var(--muted);font-size:clamp(14px,3.9vw,16.5px);margin:14px auto 20px;max-width:380px;line-height:1.5}
   .field{display:flex;gap:10px;max-width:430px;margin:0 auto;width:100%}
   input{flex:1;min-width:0;padding:17px 20px;border-radius:18px;border:1px solid var(--line);
     background:var(--glass);color:var(--ink);font-size:17px;font-family:inherit;outline:none;
@@ -78,7 +81,7 @@
     box-shadow:0 10px 34px rgba(123,92,255,.5);transition:transform .15s,filter .2s,background-position .4s}
   .go:hover{filter:brightness(1.08);background-position:100% 50%}
   .go:active{transform:scale(.95)}
-  .hint{margin-top:18px;color:#5d5a86;font-size:12.5px;letter-spacing:.02em}
+  .hint{margin-top:12px;color:#5d5a86;font-size:12px;letter-spacing:.02em}
 
   /* RESULT */
   #result{max-width:580px;width:100%;opacity:0;transform:translateY(16px);pointer-events:none;
@@ -1005,7 +1008,8 @@
 
     intro.style.opacity='0';intro.style.transform='translateY(-12px)';intro.style.pointerEvents='none';
     document.body.classList.add('result-mode');
-    result.classList.add('show');
+    result.scrollTop=0;
+    requestAnimationFrame(()=>{ result.classList.add('show'); const w=document.querySelector('.wrap'); if(w) w.scrollTop=0; });
     spawnBurst(W*0.5, H*centerY); buzz(18);
 
     const url=new URL(location.href);
