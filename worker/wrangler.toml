@@ -1,5 +1,6 @@
 name = "aura-preview"
 main = "src/index.js"
+account_id = "4b9f1283b29c7f1a2be2460899f1fcc9"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
