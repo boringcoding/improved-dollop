@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <title>AURA · What does your soul look like?</title>
-<meta name="description" content="Type your name and watch your one-of-a-kind aura come alive. Discover your aura name, rarity, energy blend, a reading made for you — and match your aura with a friend." />
+<meta name="description" content="Your name and birth date reveal a one-of-a-kind aura — your real sun sign, element, life-path number & Chinese zodiac, beautifully visualized. Then match your chart with a friend." />
 <meta name="theme-color" content="#05050c" />
 
 <meta property="og:type" content="website" />
@@ -158,7 +158,63 @@
     pointer-events:none;background:linear-gradient(to top, rgba(5,5,12,.92), transparent)}
   body.result-mode .credit, body.match-mode .credit{display:none}
 
-  @media (max-width:440px){ .field{flex-direction:column} .go{width:100%} }
+  /* INTRO: stacked name + date + button */
+  .field{flex-direction:column;align-items:stretch}
+  .field input#name{width:100%}
+  .go{width:100%}
+
+  /* DATE OF BIRTH — segmented, auto-advancing */
+  .dob{display:flex;align-items:center;justify-content:center;gap:4px;
+    padding:6px 12px;border-radius:18px;border:1px solid var(--line);background:var(--glass);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:border .2s,box-shadow .2s}
+  .dob:focus-within{border-color:rgba(123,92,255,.85);box-shadow:0 0 0 4px rgba(123,92,255,.16)}
+  .dob.shake{animation:shake .4s}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}30%,70%{transform:translateX(4px)}50%{transform:translateX(-6px)}}
+  .dob .seg{width:62px;flex:0 0 auto;text-align:center;padding:15px 4px;border:none;border-radius:12px;
+    background:transparent;color:var(--ink);font-family:inherit;font-size:21px;font-weight:600;
+    letter-spacing:.04em;font-variant-numeric:tabular-nums;outline:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+  .dob .seg.seg-y{width:96px}
+  .dob .seg:focus{background:rgba(123,92,255,.16);box-shadow:none}
+  .dob .seg::placeholder{color:#5d5a86;font-weight:500;letter-spacing:.06em}
+  .dob .sep{color:#534f7d;font-size:19px;user-select:none}
+  .dcap{display:flex;justify-content:center;gap:34px;margin-top:7px;
+    font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#5d5a86}
+  .signpeek{height:22px;margin-top:14px;color:#e7e3ff;font-size:14.5px;letter-spacing:.03em;
+    opacity:0;transform:translateY(4px);transition:opacity .45s ease,transform .45s ease}
+  .signpeek.show{opacity:1;transform:none}
+  .signpeek .gl{font-size:19px;margin-right:7px;vertical-align:-2px}
+  .signpeek .dot{opacity:.5;margin:0 8px}
+
+  /* RESULT: real-fact cards */
+  .astro{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:4px auto 20px;max-width:500px}
+  .fact{display:flex;align-items:center;gap:11px;padding:10px 14px;border-radius:15px;
+    border:1px solid var(--line);background:var(--glass);text-align:left;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  .fact .fg{font-size:21px;line-height:1}
+  .fact .ft{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+  .fact .fv{font-size:13.5px;font-weight:600;color:#f3f1ff;line-height:1.15}
+
+  /* MATCH bar becomes a small card: name + date */
+  .matchbar{flex-direction:column;align-items:stretch;gap:10px;padding:14px}
+  .matchbar form{flex-direction:column;gap:9px}
+  .matchbar .mrow{display:flex;gap:8px;align-items:center}
+  .matchbar .mrow input{flex:1;min-width:0;padding:13px 16px;border-radius:13px;font-size:16px}
+  .matchbar .dob{flex:1;padding:3px 8px}
+  .matchbar .dob .seg{width:50px;padding:11px 2px;font-size:17px}
+  .matchbar .dob .seg.seg-y{width:72px}
+  .matchbar .go{width:100%;padding:13px 16px;border-radius:13px;font-size:14px}
+  .mclose{position:absolute;top:8px;right:10px;font-size:22px;color:var(--muted);background:none;padding:4px 8px;line-height:1}
+
+  /* MATCH: factor breakdown */
+  .mBreak{display:grid;gap:11px;max-width:330px;margin:0 auto 26px;text-align:left;width:100%}
+  .mBreak .brow{display:grid;grid-template-columns:78px 1fr 40px;align-items:center;gap:10px;font-size:12.5px}
+  .mBreak .blbl{color:#d7d4ff}.mBreak .blbl small{display:block;color:var(--muted);font-size:10.5px;letter-spacing:.02em}
+  .mBreak .btrack{height:7px;border-radius:5px;background:rgba(255,255,255,.09);overflow:hidden}
+  .mBreak .bfill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--c1),var(--c2));
+    box-shadow:0 0 8px var(--c1);transform-origin:left;animation:grow .9s cubic-bezier(.2,.85,.25,1) both}
+  .mBreak .bpct{text-align:right;font-variant-numeric:tabular-nums;color:#d3d0f2;font-weight:600}
+
+  @media (max-width:440px){ .dob .seg{width:54px} .dob .seg.seg-y{width:84px} }
   @media (prefers-reduced-motion: reduce){ *{animation:none!important;transition-duration:.01ms!important} }
 </style>
 </head>
@@ -173,12 +229,21 @@
     <section id="intro">
       <div class="kicker">A U R A</div>
       <h1>your soul,<br/>visualized</h1>
-      <p class="sub">Type your name. Watch a one-of-a-kind aura bloom — then match it with someone you love.</p>
+      <p class="sub">Your name and birth date. Watch a one-of-a-kind aura bloom from your real sign, element &amp; numbers — then match it with someone you love.</p>
       <form class="field" id="form">
         <input id="name" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
                placeholder="your name…" maxlength="40" aria-label="Your name" />
+        <div class="dob" id="dob">
+          <input class="seg" data-seg="d" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="DD" aria-label="Day of birth" />
+          <span class="sep">·</span>
+          <input class="seg" data-seg="m" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="MM" aria-label="Month of birth" />
+          <span class="sep">·</span>
+          <input class="seg seg-y" data-seg="y" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="YYYY" aria-label="Year of birth" />
+        </div>
+        <div class="dcap"><span>Day</span><span>Month</span><span>Year</span></div>
         <button class="go" type="submit">Reveal ✦</button>
       </form>
+      <div class="signpeek" id="signpeek" aria-live="polite"></div>
       <div class="hint">No sign-up · nothing leaves your device · just light</div>
     </section>
 
@@ -186,6 +251,7 @@
       <div class="rarity" id="rarity"></div>
       <div class="forName" id="forName"></div>
       <h2 class="auraName" id="auraName"></h2>
+      <div class="astro" id="astro"></div>
       <p class="reading" id="reading"></p>
       <div class="bars" id="bars"></div>
       <div class="traits" id="traits"></div>
@@ -204,6 +270,7 @@
     <div class="mScore"><span id="mScoreNum">0</span><span class="pc">%</span></div>
     <div class="mHeart"><i id="mHeart"></i></div>
     <p class="mVerdict" id="mVerdict"></p>
+    <div class="mBreak" id="mBreak"></div>
     <div class="actions">
       <button class="act primary" id="shareMatchBtn">Share match</button>
       <button class="act" id="newMatchBtn">Another</button>
@@ -214,8 +281,19 @@
   <!-- MATCH: slim name entry bar -->
   <div class="matchbar" id="matchbar">
     <form id="matchForm">
-      <input id="matchName" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
-             placeholder="their name…" maxlength="40" aria-label="Their name" />
+      <div class="mrow">
+        <input id="matchName" type="text" autocomplete="off" autocapitalize="words" spellcheck="false"
+               placeholder="their name…" maxlength="40" aria-label="Their name" />
+      </div>
+      <div class="mrow">
+        <div class="dob" id="matchDob">
+          <input class="seg" data-seg="d" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="DD" aria-label="Their day of birth" />
+          <span class="sep">·</span>
+          <input class="seg" data-seg="m" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="MM" aria-label="Their month of birth" />
+          <span class="sep">·</span>
+          <input class="seg seg-y" data-seg="y" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="YYYY" aria-label="Their year of birth" />
+        </div>
+      </div>
       <button class="go" type="submit">Match 💞</button>
     </form>
     <button class="mclose" id="matchClose" aria-label="Close">×</button>
@@ -284,47 +362,192 @@
   const RARITY=["1 in a generation","rarer than 99% of souls","rarer than 97% of souls",
     "rarer than 94% of souls","rarer than 88% of souls","beautifully uncommon","one of a kind"];
 
+  /* ============ real astrology + numerology engine ============ */
+  const ELEMENTS={
+    Fire:{glyph:"🔥",hue:8},  Earth:{glyph:"🌿",hue:138},
+    Air:{glyph:"💨",hue:255}, Water:{glyph:"💧",hue:198}
+  };
+  // tropical sun-sign cutoffs by month*100+day (standard convention)
+  const CUTS=[[119,"Capricorn"],[218,"Aquarius"],[320,"Pisces"],[419,"Aries"],
+    [520,"Taurus"],[620,"Gemini"],[722,"Cancer"],[822,"Leo"],[922,"Virgo"],
+    [1022,"Libra"],[1121,"Scorpio"],[1221,"Sagittarius"],[1231,"Capricorn"]];
+  const SIGN={
+    Aries:{glyph:"♈",el:"Fire",mod:"Cardinal",ru:"Mars",pol:"Yang",kw:["bold","direct","fearless"],blurb:"first to leap, built to begin"},
+    Taurus:{glyph:"♉",el:"Earth",mod:"Fixed",ru:"Venus",pol:"Yin",kw:["steady","sensual","loyal"],blurb:"immovable, and worth the wait"},
+    Gemini:{glyph:"♊",el:"Air",mod:"Mutable",ru:"Mercury",pol:"Yang",kw:["quick","curious","witty"],blurb:"many minds, one bright spark"},
+    Cancer:{glyph:"♋",el:"Water",mod:"Cardinal",ru:"Moon",pol:"Yin",kw:["tender","tidal","devoted"],blurb:"soft shell, fierce heart"},
+    Leo:{glyph:"♌",el:"Fire",mod:"Fixed",ru:"Sun",pol:"Yang",kw:["radiant","proud","warm"],blurb:"born to be seen, made to give light"},
+    Virgo:{glyph:"♍",el:"Earth",mod:"Mutable",ru:"Mercury",pol:"Yin",kw:["precise","devoted","sharp"],blurb:"quietly brilliant, endlessly kind"},
+    Libra:{glyph:"♎",el:"Air",mod:"Cardinal",ru:"Venus",pol:"Yang",kw:["charming","fair","graceful"],blurb:"lives for balance and beautiful things"},
+    Scorpio:{glyph:"♏",el:"Water",mod:"Fixed",ru:"Pluto",pol:"Yin",kw:["intense","magnetic","deep"],blurb:"all or nothing, always"},
+    Sagittarius:{glyph:"♐",el:"Fire",mod:"Mutable",ru:"Jupiter",pol:"Yang",kw:["free","honest","restless"],blurb:"chasing the horizon, allergic to cages"},
+    Capricorn:{glyph:"♑",el:"Earth",mod:"Cardinal",ru:"Saturn",pol:"Yin",kw:["driven","patient","solid"],blurb:"built to last, climbing quietly"},
+    Aquarius:{glyph:"♒",el:"Air",mod:"Fixed",ru:"Uranus",pol:"Yang",kw:["original","electric","free"],blurb:"ahead of time, allergic to normal"},
+    Pisces:{glyph:"♓",el:"Water",mod:"Mutable",ru:"Neptune",pol:"Yin",kw:["dreamy","intuitive","gentle"],blurb:"endlessly deep, quietly psychic"}
+  };
+  const SIGN_ORDER=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+  function sunSign(m,d){
+    const md=m*100+d; let name="Capricorn";
+    for(const c of CUTS){ if(md<=c[0]){name=c[1];break;} }
+    return {name, ...SIGN[name]};
+  }
+  const LIFEPATH={
+    1:{title:"The Leader",line:"independent, pioneering, self-made."},
+    2:{title:"The Peacemaker",line:"intuitive, diplomatic, deeply feeling."},
+    3:{title:"The Creator",line:"expressive, joyful, magnetic."},
+    4:{title:"The Builder",line:"grounded, loyal, relentlessly reliable."},
+    5:{title:"The Free Spirit",line:"adventurous, restless, alive to change."},
+    6:{title:"The Nurturer",line:"loving, responsible, the heart of the room."},
+    7:{title:"The Seeker",line:"analytical, spiritual, an old soul."},
+    8:{title:"The Powerhouse",line:"ambitious, magnetic, built for big things."},
+    9:{title:"The Humanitarian",line:"compassionate, wise, here for everyone."},
+    11:{title:"Master 11 · The Intuitive",line:"visionary, sensitive, lit from within."},
+    22:{title:"Master 22 · The Builder",line:"dreams made real, at scale."},
+    33:{title:"Master 33 · The Teacher",line:"love as a calling."}
+  };
+  function reduceNum(n,keepMaster){
+    while(n>9 && !(keepMaster&&(n===11||n===22||n===33))){
+      n=String(n).split('').reduce((a,c)=>a+ +c,0);
+    }
+    return n;
+  }
+  function lifePath(y,m,d){
+    const part=x=>reduceNum(x,true);
+    const n=reduceNum(part(y)+part(m)+part(d),true);
+    return {n, master:(n===11||n===22||n===33), ...LIFEPATH[n]};
+  }
+  const ANIMALS=[
+    {a:"Rat",g:"🐀",t:"clever and quick"},{a:"Ox",g:"🐂",t:"steady and strong"},
+    {a:"Tiger",g:"🐅",t:"brave and bold"},{a:"Rabbit",g:"🐇",t:"gentle and lucky"},
+    {a:"Dragon",g:"🐉",t:"magnetic and fearless"},{a:"Snake",g:"🐍",t:"wise and intuitive"},
+    {a:"Horse",g:"🐎",t:"free and warm"},{a:"Goat",g:"🐐",t:"tender and creative"},
+    {a:"Monkey",g:"🐒",t:"witty and inventive"},{a:"Rooster",g:"🐓",t:"sharp and proud"},
+    {a:"Dog",g:"🐕",t:"loyal and honest"},{a:"Pig",g:"🐖",t:"generous and easy to love"}
+  ];
+  const CH_EL=["Wood","Fire","Earth","Metal","Water"];
+  function chinese(y,m,d){
+    // years roll over near Lichun (~Feb 4) — close enough without an ephemeris
+    let yr=y; if(m<2||(m===2&&d<4)) yr--;
+    const ai=((yr-4)%12+12)%12;
+    const ei=Math.floor((((yr-4)%10)+10)%10/2);
+    const an=ANIMALS[ai];
+    return {animal:an.a, glyph:an.g, trait:an.t, element:CH_EL[ei]};
+  }
+  function buildEnergy(sunEl,chiEl,mod,lp,rnd){
+    const w={Fire:6,Water:6,Air:6,Earth:6,Aether:6};
+    w[sunEl]+=34;
+    const chiMap={Fire:"Fire",Water:"Water",Earth:"Earth",Metal:"Air",Wood:"Aether"};
+    w[chiMap[chiEl]]+=16;
+    const modMap={Cardinal:"Fire",Fixed:"Earth",Mutable:"Air"};
+    w[modMap[mod]]+=8;
+    w.Aether+=(lp.master?12:4);
+    for(const k in w) w[k]+=rnd()*6;
+    const total=Object.values(w).reduce((a,b)=>a+b,0);
+    const arr=ENERGIES.map(e=>({...e,pct:Math.round(w[e.k]/total*100)}));
+    arr[0].pct+=100-arr.reduce((a,b)=>a+b.pct,0);
+    return arr.sort((a,b)=>b.pct-a.pct);
+  }
+  const hsl=(h,s,l)=>`hsl(${h} ${s}% ${l}%)`;
+  const pick=(a,rnd)=>a[Math.floor(rnd()*a.length)];
+  const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+
+  /* ---- compatibility (real synastry rules) ---- */
+  function elemPair(a,b){
+    if(a===b) return 82;
+    const has=(x,y)=>(a===x&&b===y)||(a===y&&b===x);
+    if(has("Fire","Air")) return 92;
+    if(has("Earth","Water")) return 92;
+    if(has("Air","Water")) return 64;
+    if(has("Fire","Earth")) return 58;
+    if(has("Air","Earth")) return 55;
+    if(has("Fire","Water")) return 50;
+    return 60;
+  }
+  function aspectInfo(sA,sB){
+    const i=SIGN_ORDER.indexOf(sA), j=SIGN_ORDER.indexOf(sB);
+    const dist=Math.min((i-j+12)%12,(j-i+12)%12);
+    const M={0:[78,"Conjunction"],1:[55,"Semi-sextile"],2:[85,"Sextile"],
+      3:[52,"Square"],4:[95,"Trine"],5:[50,"Quincunx"],6:[72,"Opposition"]};
+    return {score:M[dist][0], name:M[dist][1]};
+  }
+  function numPair(a,b){
+    if(a===b) return 80;
+    const great=[[1,5],[1,7],[2,6],[2,8],[3,6],[3,9],[4,8],[5,7],[6,9],[11,2],[22,4],[33,6]];
+    const r=x=>reduceNum(x,false);
+    for(const g of great){ const x=g[0],y=g[1];
+      if((a===x&&b===y)||(a===y&&b===x)||(r(a)===x&&r(b)===y)||(r(a)===y&&r(b)===x)) return 90; }
+    return Math.max(48, 86-Math.abs(r(a)-r(b))*6);
+  }
+  function verdictFor(pct){
+    if(pct>=95) return "Cosmically entangled. Two flames, one fire. 🔥";
+    if(pct>=85) return "Rare resonance — your charts finish each other's light. ✨";
+    if(pct>=72) return "Warm, magnetic harmony. You make each other brighter. 💫";
+    if(pct>=58) return "Beautiful contrast — opposites that orbit close. 🪐";
+    return "Different frequencies, but sparks fly at the edges. ⚡";
+  }
+  function synastry(A,B){
+    if(A.sign&&B.sign){
+      const e=elemPair(A.sign.el,B.sign.el);
+      const asp=aspectInfo(A.sign.name,B.sign.name);
+      const nm=numPair(A.lifePath.n,B.lifePath.n);
+      let pct=Math.round(0.4*e+0.35*asp.score+0.25*nm);
+      const j=mulberry32(hashStr((A.name||'')+'|'+(B.name||'')+'|'+(A.dob?A.dob.y:0)+'|'+(B.dob?B.dob.y:0)));
+      pct=Math.max(34,Math.min(99,pct+Math.floor(j()*5-2)));
+      if(A.dob&&B.dob&&A.dob.y===B.dob.y&&A.dob.m===B.dob.m&&A.dob.d===B.dob.d&&(A.name||'').toLowerCase()===(B.name||'').toLowerCase()) pct=100;
+      const breakdown=[
+        {label:"Elements",pct:e,note:`${A.sign.el} × ${B.sign.el}`},
+        {label:"Signs",pct:asp.score,note:asp.name},
+        {label:"Numbers",pct:nm,note:`${A.lifePath.n} & ${B.lifePath.n}`}
+      ];
+      return {pct,verdict:verdictFor(pct),breakdown};
+    }
+    const key=[(A.name||'').toLowerCase(),(B.name||'').toLowerCase()].sort().join('|');
+    const r=mulberry32(hashStr('match:'+key));
+    const pct=Math.floor(48+r()*52);
+    return {pct,verdict:verdictFor(pct),breakdown:[]};
+  }
+
   /* ============ generation ============ */
-  function generate(rawName){
+  function generate(rawName,dob){
     const name=(rawName||"").trim();
-    const seedKey=name.toLowerCase().replace(/\s+/g,' ')||"stranger";
+    if(!dob){ return generateFromName(name); }
+    const {y,m,d}=dob;
+    const sign=sunSign(m,d);
+    const lp=lifePath(y,m,d);
+    const chi=chinese(y,m,d);
+    const seedKey=name.toLowerCase().replace(/\s+/g,' ')+'|'+y+'-'+m+'-'+d;
     const seed=hashStr(seedKey);
     const rnd=mulberry32(seed);
-    const pick=a=>a[Math.floor(rnd()*a.length)];
-
-    const auraName=pick(ADJ)+" "+pick(NOUN);
-    const baseHue=Math.floor(rnd()*360);
-    const h1=baseHue, h2=(baseHue+40+Math.floor(rnd()*120))%360, h3=(baseHue+200+Math.floor(rnd()*100))%360;
-    const c1=`hsl(${h1} 95% 64%)`, c2=`hsl(${h2} 92% 60%)`, c3=`hsl(${h3} 90% 62%)`;
-
-    let raw=ENERGIES.map(()=>0.15+rnd());
-    const sum=raw.reduce((a,b)=>a+b,0);
-    let ints=raw.map(v=>Math.round(v/sum*100));
-    ints[0]+=100-ints.reduce((a,b)=>a+b,0);
-    const energy=ENERGIES.map((e,i)=>({...e,pct:ints[i]})).sort((a,b)=>b.pct-a.pct);
-
-    const traits=[]; while(traits.length<3){const t=pick(TRAITS); if(!traits.includes(t))traits.push(t);}
-    const reading=pick(OPEN)+" "+pick(MID)+" "+pick(CLOSE);
-    const rarity=pick(RARITY);
-
-    return {name,seedKey,seed,auraName,h1,h2,h3,c1,c2,c3,
+    const base=ELEMENTS[sign.el].hue;
+    const h1=((base+Math.floor(rnd()*30)-15)%360+360)%360;
+    const h2=(h1+30+Math.floor(rnd()*45))%360;
+    const h3=(h1+200+Math.floor(rnd()*80))%360;
+    const energy=buildEnergy(sign.el,chi.element,sign.mod,lp,rnd);
+    const auraName=pick(ADJ,rnd)+" "+pick(NOUN,rnd);
+    const reading=`${sign.name} — ${sign.el.toLowerCase()} & ${sign.mod.toLowerCase()}, ruled by ${sign.ru}. ${cap(sign.blurb)}. As Life Path ${lp.n}, ${lp.title}: ${lp.line} Born in the year of the ${chi.element} ${chi.animal} — ${chi.trait}.`;
+    const rarity=lp.master?"1 in a generation":pick(RARITY,rnd);
+    const traits=sign.kw.slice();
+    return {name,seedKey,seed,dob,sign,lifePath:lp,chinese:chi,
+      auraName,h1,h2,h3,
+      c1:hsl(h1,95,64),c2:hsl(h2,92,60),c3:hsl(h3,90,62),
       rgb1:hslToRgb(h1,95,64),rgb2:hslToRgb(h2,92,60),rgb3:hslToRgb(h3,90,62),
       energy,traits,reading,rarity};
   }
-
-  function matchOf(a,b){
-    const A=(a||'').trim().toLowerCase(), B=(b||'').trim().toLowerCase();
-    const key=[A,B].sort().join('|');
-    const r=mulberry32(hashStr('match:'+key));
-    let pct=Math.floor(48+r()*52); // 48..99
-    if(A&&A===B) pct=100;
-    let verdict;
-    if(pct>=95) verdict="Cosmically entangled. Two flames, one fire. 🔥";
-    else if(pct>=85) verdict="Rare resonance — your auras finish each other's light. ✨";
-    else if(pct>=72) verdict="Warm, magnetic harmony. You make each other brighter. 💫";
-    else if(pct>=58) verdict="Beautiful contrast — opposites that orbit close. 🪐";
-    else verdict="Different frequencies, but sparks fly at the edges. ⚡";
-    return {pct,verdict};
+  function generateFromName(name){
+    const seedKey=(name||'').toLowerCase().replace(/\s+/g,' ')||"stranger";
+    const seed=hashStr(seedKey); const rnd=mulberry32(seed);
+    const auraName=pick(ADJ,rnd)+" "+pick(NOUN,rnd);
+    const baseHue=Math.floor(rnd()*360);
+    const h1=baseHue,h2=(baseHue+40+Math.floor(rnd()*120))%360,h3=(baseHue+200+Math.floor(rnd()*100))%360;
+    let raw=ENERGIES.map(()=>0.15+rnd());const sum=raw.reduce((a,b)=>a+b,0);
+    let ints=raw.map(v=>Math.round(v/sum*100));ints[0]+=100-ints.reduce((a,b)=>a+b,0);
+    const energy=ENERGIES.map((e,i)=>({...e,pct:ints[i]})).sort((a,b)=>b.pct-a.pct);
+    return {name,seedKey,seed,dob:null,sign:null,lifePath:null,chinese:null,
+      auraName,h1,h2,h3,c1:hsl(h1,95,64),c2:hsl(h2,92,60),c3:hsl(h3,90,62),
+      rgb1:hslToRgb(h1,95,64),rgb2:hslToRgb(h2,92,60),rgb3:hslToRgb(h3,90,62),
+      energy,traits:["luminous","one of a kind","quietly magnetic"],
+      reading:"A one-of-a-kind aura. Add your birth date to reveal your sun sign, element and life path.",
+      rarity:pick(RARITY,rnd)};
   }
 
   /* ============ WebGL aura ============ */
@@ -521,6 +744,67 @@
   const form=document.getElementById('form');
   const nameInput=document.getElementById('name');
   function buzz(ms){ if(navigator.vibrate) try{navigator.vibrate(ms);}catch(_){ } }
+
+  /* ---- segmented date-of-birth input (auto-advance + live) ---- */
+  function validDate(y,m,d){
+    if(!y||!m||!d) return false;
+    if(m<1||m>12||d<1||d>31) return false;
+    if(y<1900||y>new Date().getFullYear()) return false;
+    const dt=new Date(y,m-1,d);
+    return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d;
+  }
+  function wireDate(root,onChange){
+    const segs=[].slice.call(root.querySelectorAll('.seg'));
+    const dd=segs[0],mm=segs[1],yy=segs[2];
+    function get(){
+      const d=+dd.value,m=+mm.value,y=+yy.value;
+      if(dd.value&&mm.value&&yy.value.length===4&&validDate(y,m,d)) return {y,m,d};
+      return null;
+    }
+    function fire(){ if(onChange) onChange(get()); }
+    segs.forEach((s,i)=>{
+      s.addEventListener('input',()=>{
+        s.value=s.value.replace(/\D/g,'');
+        if(s.value.length>=s.maxLength&&i<segs.length-1) segs[i+1].focus();
+        fire();
+      });
+      s.addEventListener('keydown',e=>{
+        if(e.key==='Backspace'&&!s.value&&i>0){ segs[i-1].focus(); }
+      });
+      s.addEventListener('paste',e=>{
+        const txt=((e.clipboardData||window.clipboardData).getData('text')||'');
+        const nums=txt.match(/\d+/g);
+        if(nums&&nums.length>=3){ e.preventDefault();
+          dd.value=nums[0].slice(0,2); mm.value=nums[1].slice(0,2); yy.value=nums[2].slice(0,4);
+          fire(); yy.focus();
+        }
+      });
+    });
+    return {
+      get,
+      set(dob){ if(dob){dd.value=String(dob.d);mm.value=String(dob.m);yy.value=String(dob.y);} else {dd.value=mm.value=yy.value='';} fire(); },
+      clear(){ dd.value=mm.value=yy.value=''; fire(); },
+      focus(){ dd.focus(); },
+      shake(){ root.classList.add('shake'); setTimeout(()=>root.classList.remove('shake'),420); }
+    };
+  }
+  const signpeek=document.getElementById('signpeek');
+  const introDate=wireDate(document.getElementById('dob'),dob=>{
+    if(dob){ const s=sunSign(dob.m,dob.d);
+      signpeek.innerHTML=`<span class="gl">${s.glyph}</span>${s.name}<span class="dot">·</span>${s.el} ${s.mod.toLowerCase()}`;
+      signpeek.classList.add('show');
+    } else { signpeek.classList.remove('show'); }
+  });
+  const matchDate=wireDate(document.getElementById('matchDob'));
+  const pad2=n=>String(n).padStart(2,'0');
+  function dobStr(dob){ return dob? `${dob.y}${pad2(dob.m)}${pad2(dob.d)}` : ''; }
+  function parseDob(str){
+    if(!str) return null;
+    const s=String(str).replace(/\D/g,'');
+    if(s.length!==8) return null;
+    const y=+s.slice(0,4),m=+s.slice(4,6),d=+s.slice(6,8);
+    return validDate(y,m,d)?{y,m,d}:null;
+  }
   function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 
   function animateCount(el,to,dur){
@@ -541,6 +825,15 @@
     document.getElementById('rarity').innerHTML='✦ <b>'+escapeHtml(data.rarity)+'</b>';
     document.getElementById('forName').textContent=data.name?('the aura of '+data.name):'the aura of you';
     document.getElementById('auraName').innerHTML='<span class="em">'+escapeHtml(data.auraName)+'</span>';
+    const astro=document.getElementById('astro');
+    if(data.sign){
+      const el=ELEMENTS[data.sign.el].glyph;
+      astro.innerHTML=
+        `<div class="fact"><span class="fg">${data.sign.glyph}</span><div><div class="ft">Sun sign</div><div class="fv">${data.sign.name}</div></div></div>`+
+        `<div class="fact"><span class="fg">${el}</span><div><div class="ft">Element</div><div class="fv">${data.sign.el} · ${data.sign.mod}</div></div></div>`+
+        `<div class="fact"><span class="fg">✦</span><div><div class="ft">Life path</div><div class="fv">${data.lifePath.n} · ${escapeHtml(data.lifePath.title)}</div></div></div>`+
+        `<div class="fact"><span class="fg">${data.chinese.glyph}</span><div><div class="ft">Chinese</div><div class="fv">${data.chinese.element} ${data.chinese.animal}</div></div></div>`;
+    } else { astro.innerHTML=''; }
     document.getElementById('reading').textContent=data.reading;
 
     const bars=document.getElementById('bars');bars.innerHTML='';
@@ -560,10 +853,11 @@
     spawnBurst(W*0.5, H*centerY); buzz(18);
 
     const url=new URL(location.href);
-    url.searchParams.delete('match');
+    url.searchParams.delete('match'); url.searchParams.delete('mdob');
     if(data.name)url.searchParams.set('name',data.name);else url.searchParams.delete('name');
+    if(data.dob)url.searchParams.set('dob',dobStr(data.dob));else url.searchParams.delete('dob');
     if(push)history.pushState({name:data.name},'',url);
-    document.title=data.name?`${data.name}'s aura is ${data.auraName} · AURA`:'AURA · your soul, visualized';
+    document.title=data.sign?`${data.name||'Your'} aura · ${data.sign.name} ${data.sign.glyph} · AURA`:'AURA · your soul, visualized';
   }
 
   function reset(){
@@ -573,18 +867,25 @@
     intro.style.opacity='1';intro.style.transform='none';intro.style.pointerEvents='auto';
     cur=null;targetIntro=0.62;centerY=0.40;pal={c1:[0.55,0.45,0.95],c2:[0.0,0.88,1.0],c3:[1.0,0.37,0.78]};
     if(!useGL)buildBlobs();
-    nameInput.value='';
-    const url=new URL(location.href);url.searchParams.delete('name');url.searchParams.delete('match');history.pushState({},'',url);
+    nameInput.value=''; introDate.clear(); signpeek.classList.remove('show');
+    const url=new URL(location.href);
+    ['name','match','dob','mdob'].forEach(k=>url.searchParams.delete(k));
+    history.pushState({},'',url);
     document.title='AURA · your soul, visualized';
     setTimeout(()=>nameInput.focus(),300);
   }
 
-  form.addEventListener('submit',e=>{e.preventDefault();render(generate(nameInput.value.trim()),true);});
+  form.addEventListener('submit',e=>{
+    e.preventDefault();
+    const dob=introDate.get();
+    if(!dob){ introDate.shake(); introDate.focus(); toast('Add your birth date to reveal it ✦'); return; }
+    render(generate(nameInput.value.trim(),dob),true);
+  });
   document.getElementById('againBtn').addEventListener('click',reset);
 
   document.getElementById('shareBtn').addEventListener('click',async()=>{
     const url=location.href;
-    const text=cur?`My aura is ${cur.auraName} ✦ what's yours?`:`Discover your aura ✦`;
+    const text=cur?`My aura is ${cur.auraName}${cur.sign?` · ${cur.sign.name} ${cur.sign.glyph}`:''} ✦ what's yours?`:`Discover your aura ✦`;
     buzz(12);
     if(navigator.share){try{await navigator.share({title:'AURA',text,url});return;}catch(_){}}
     try{await navigator.clipboard.writeText(url);toast('Link copied — go make someone curious ✦');}catch(_){toast(url);}
@@ -600,20 +901,26 @@
   function closeBar(){matchbar.classList.remove('show');matchNameInput.blur();}
   document.getElementById('matchBtn').addEventListener('click',openBar);
   document.getElementById('matchClose').addEventListener('click',closeBar);
-  document.getElementById('newMatchBtn').addEventListener('click',()=>{matchNameInput.value='';openBar();});
+  document.getElementById('newMatchBtn').addEventListener('click',()=>{matchNameInput.value='';matchDate.clear();openBar();});
   document.getElementById('backBtn').addEventListener('click',exitMatch);
 
-  function startMatch(nameA,nameB,push){
-    const d2=generate(nameB);
+  function startMatch(nameB,dobB,push){
+    const A=cur||generate(nameInput.value.trim(),introDate.get());
+    const d2=generate(nameB,dobB);
     palB={c1:d2.rgb1,c2:d2.rgb2,c3:d2.rgb3};
-    const m=matchOf(nameA,nameB); lastMatch={a:nameA,b:nameB,...m};
+    const m=synastry(A,d2); lastMatch={a:A.name,b:nameB,dobB,...m};
 
     // gradient that literally blends both auras' colors
-    document.body.style.setProperty('--c1', (cur?cur.c1:d2.c1));
+    document.body.style.setProperty('--c1', (A.c1||d2.c1));
     document.body.style.setProperty('--c2', d2.c2);
 
-    document.getElementById('mNames').textContent=(nameA||'you').toUpperCase()+'  ✕  '+(nameB||'them').toUpperCase();
+    document.getElementById('mNames').textContent=(A.name||'you').toUpperCase()+'  ✕  '+(nameB||'them').toUpperCase();
     document.getElementById('mVerdict').textContent=m.verdict;
+    const mb=document.getElementById('mBreak');
+    mb.innerHTML=(m.breakdown||[]).map(b=>
+      `<div class="brow"><div class="blbl">${b.label}<small>${escapeHtml(b.note)}</small></div>`+
+      `<div class="btrack"><i class="bfill" style="width:${b.pct}%"></i></div>`+
+      `<div class="bpct">${b.pct}%</div></div>`).join('');
 
     closeBar();
     document.body.classList.add('match-mode');
@@ -626,8 +933,11 @@
     buzz(15);
 
     if(push){const url=new URL(location.href);
-      if(nameA)url.searchParams.set('name',nameA);
-      url.searchParams.set('match',nameB);history.pushState({match:nameB},'',url);}
+      if(A.name)url.searchParams.set('name',A.name);
+      if(A.dob)url.searchParams.set('dob',dobStr(A.dob));
+      url.searchParams.set('match',nameB);
+      if(dobB)url.searchParams.set('mdob',dobStr(dobB));
+      history.pushState({match:nameB},'',url);}
   }
   function exitMatch(){
     document.body.classList.remove('match-mode');
@@ -636,8 +946,11 @@
     const url=new URL(location.href);url.searchParams.delete('match');history.pushState({},'',url);
   }
   document.getElementById('matchForm').addEventListener('submit',e=>{
-    e.preventDefault();const other=matchNameInput.value.trim();if(!other)return;
-    startMatch(cur?cur.name:'',other,true);
+    e.preventDefault();
+    const other=matchNameInput.value.trim();
+    const dobB=matchDate.get();
+    if(!dobB){ matchDate.shake(); matchDate.focus(); toast('Add their birth date too ✦'); return; }
+    startMatch(other,dobB,true);
   });
   document.getElementById('shareMatchBtn').addEventListener('click',async()=>{
     if(!lastMatch)return;buzz(12);
@@ -665,7 +978,11 @@
     c.fillStyle='#bdb9e6';c.font='500 34px Sora,sans-serif';c.fillText((data.name?('the aura of '+data.name):'the aura of you').toUpperCase(),cx,h*0.40+R*0.55);
     const grad=c.createLinearGradient(cx-380,0,cx+380,0);grad.addColorStop(0,data.c1);grad.addColorStop(1,data.c2);
     c.fillStyle=grad;c.font='800 86px Sora,sans-serif';c.fillText(data.auraName,cx,h*0.40+R*0.55+96);
-    c.fillStyle='#ece9ff';c.font='400 33px Sora,sans-serif';wrap(c,data.reading,cx,h*0.40+R*0.55+168,860,46);
+    let ry=h*0.40+R*0.55+168;
+    if(data.sign){c.fillStyle='#cfccef';c.font='600 30px Sora,sans-serif';
+      c.fillText(`${data.sign.glyph}  ${data.sign.name} · ${data.sign.el} · Life Path ${data.lifePath.n} · ${data.chinese.animal}`,cx,ry);
+      ry+=58;}
+    c.fillStyle='#ece9ff';c.font='400 33px Sora,sans-serif';wrap(c,data.reading,cx,ry,860,46);
     let ey=h-250;c.font='600 28px Sora,sans-serif';
     data.energy.slice(0,3).forEach((e,i)=>{const bx=cx-380,bw=760,y=ey+i*56;
       c.textAlign='left';c.fillStyle='#9b97c9';c.fillText(e.k,bx,y+8);
@@ -687,18 +1004,33 @@
     clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2600);}
 
   addEventListener('popstate',()=>{
-    const u=new URL(location.href);const n=u.searchParams.get('name');const m=u.searchParams.get('match');
-    if(n!==null){
-      if(!cur||cur.name!==n){nameInput.value=n;render(generate(n),false);}
-      if(m!==null){startMatch(n,m,false);} else { if(document.body.classList.contains('match-mode'))exitMatch(); }
+    const u=new URL(location.href);
+    const n=u.searchParams.get('name');
+    const dob=parseDob(u.searchParams.get('dob'));
+    const m=u.searchParams.get('match');
+    const mdob=parseDob(u.searchParams.get('mdob'));
+    if(n!==null||dob){
+      const nm=n||'';
+      if(!cur||cur.name!==nm||(dob&&(!cur.dob||dobStr(cur.dob)!==dobStr(dob)))){
+        nameInput.value=nm; if(dob)introDate.set(dob);
+        render(generate(nm,dob),false);
+      }
+      if(m!==null){ startMatch(m,mdob,false); }
+      else { if(document.body.classList.contains('match-mode'))exitMatch(); }
     } else { reset(); }
   });
 
   // deep link
-  const u=new URL(location.href);const initName=u.searchParams.get('name');const initMatch=u.searchParams.get('match');
-  if(initName!==null){nameInput.value=initName;render(generate(initName),false);
-    if(initMatch!==null){startMatch(initName,initMatch,false);}}
-  else{setTimeout(()=>nameInput.focus(),600);}
+  const u=new URL(location.href);
+  const initName=u.searchParams.get('name');
+  const initDob=parseDob(u.searchParams.get('dob'));
+  const initMatch=u.searchParams.get('match');
+  const initMdob=parseDob(u.searchParams.get('mdob'));
+  if(initName!==null||initDob){
+    const nm=initName||''; nameInput.value=nm; if(initDob)introDate.set(initDob);
+    render(generate(nm,initDob),false);
+    if(initMatch!==null){ startMatch(initMatch,initMdob,false); }
+  } else { setTimeout(()=>nameInput.focus(),600); }
 })();
 </script>
 </body>
